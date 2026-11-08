@@ -1,0 +1,15 @@
+{
+  "enabledMcpjsonServers": ["21st"],
+  "extraKnownMarketplaces": {
+    "ponytail": {
+      "source": { "source": "github", "repo": "DietrichGebert/ponytail" }
+    },
+    "headroom-marketplace": {
+      "source": { "source": "github", "repo": "headroomlabs-ai/headroom" }
+    }
+  },
+  "enabledPlugins": {
+    "ponytail@ponytail": true,
+    "headroom@headroom-marketplace": true
+  }
+}
