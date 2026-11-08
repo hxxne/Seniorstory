@@ -66,7 +66,7 @@ export default function FeaturesSection() {
   return (
     <section id="features" className="relative px-5 py-20 md:px-10 md:py-40 lg:px-16 lg:py-48">
       <div
-        className="fixed inset-0 -z-10 bg-cover bg-center"
+        className="fixed inset-0 -z-10 bg-[#1C1410] bg-cover bg-center"
         style={{ backgroundImage: `url("${background}")` }}
         aria-hidden="true"
       />
