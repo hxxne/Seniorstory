@@ -18,38 +18,47 @@ const toneBg = {
   ink: 'radial-gradient(ellipse at 30% 20%, #1D2029 0%, #0B0D11 65%)',
 } as const
 
-/** 동작 영상. 세션 시계가 기준이고, 영상은 그 시각을 따라갑니다 */
-function MoveVideo({ src, poster, at, playing, muted }: { src: string; poster: string; at: number; playing: boolean; muted: boolean }) {
+/** 동작 영상. 세션 시계가 기준이고, 영상은 그 시각을 따라갑니다.
+ *  영상의 키프레임이 약 8초에 하나라 위치를 옮기는 일(탐색)이 느립니다. 그래서 조금 어긋난 것은
+ *  재생 속도를 살짝 바꿔 따라잡고, 크게 어긋났을 때만 위치를 옮깁니다. */
+function MoveVideo({ src, poster, at, playing, muted, active }: { src: string; poster: string; at: number; playing: boolean; muted: boolean; active: boolean }) {
   const ref = useRef<HTMLVideoElement>(null)
 
-  // 1.2초 넘게 벌어지면 시계에 맞춥니다 (일시정지 뒤 재개, 동작 건너뛰기, 늦게 연 TV 창)
   useEffect(() => {
     const v = ref.current
-    if (!v || v.readyState < 1) return
-    if (Math.abs(v.currentTime - at) > 1.2) v.currentTime = Math.max(0, Math.min(at, (v.duration || at) - 0.2))
-  }, [at])
+    if (!v || !active || v.readyState < 1 || v.seeking) return
+    const target = Math.max(0, Math.min(at, (v.duration || at) - 0.25))
+    const drift = target - v.currentTime // 양수면 영상이 뒤처진 것
+    if (Math.abs(drift) > 6 || (!playing && Math.abs(drift) > 1.5)) {
+      v.playbackRate = 1
+      v.currentTime = target
+    } else if (playing) {
+      v.playbackRate = Math.abs(drift) < 0.3 ? 1 : drift > 0 ? 1.08 : 0.92
+    }
+  }, [at, playing, active])
 
   useEffect(() => {
     const v = ref.current
     if (!v) return
-    v.muted = muted
-    if (playing) v.play().catch(() => {})
+    v.muted = muted || !active
+    if (active && playing) v.play().catch(() => {})
     else v.pause()
-  }, [playing, muted])
+  }, [playing, muted, active])
 
   return (
     <video
       ref={ref}
       src={src}
       poster={poster}
-      muted={muted}
+      muted
       playsInline
       preload="auto"
       onLoadedMetadata={(e) => {
-        e.currentTarget.currentTime = at
+        if (!active) return
+        if (at > 1) e.currentTarget.currentTime = at
         if (playing) e.currentTarget.play().catch(() => {})
       }}
-      className="absolute inset-0 h-full w-full bg-black object-contain"
+      className={`absolute inset-0 h-full w-full bg-black object-contain ${active ? '' : 'invisible'}`}
     />
   )
 }
@@ -87,6 +96,8 @@ export default function TV() {
 
   const idle = session.status === 'idle'
   const detail = current?.move.detail
+  // 이 단계의 다음 동작, 없으면 다음 단계의 첫 동작
+  const nextMove = current && stage ? (stage.moves[current.index + 1] ?? program?.stages[session.stageIndex + 1]?.moves[0]) : undefined
   const next = nextExercise()
 
   return (
@@ -129,7 +140,12 @@ export default function TV() {
           /* ---------- 송출 화면 ---------- */
           <motion.div key="live" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }} className="absolute inset-0">
             {/* 영상 영역: 영상이 있는 동작은 영상을, 없는 동작(호흡)은 실루엣을 보여 줍니다 */}
-            {detail && current ? <MoveVideo key={detail.video} src={asset(detail.video)} poster={asset(detail.poster)} at={elapsed - current.startSec} playing={session.status === 'playing'} muted={muted} /> : null}
+            {/* 다음 동작의 영상도 미리 올려 두어, 넘어갈 때 기다리지 않게 합니다 */}
+            {current
+              ? [current.move, nextMove].map((mv, i) =>
+                  mv?.detail ? <MoveVideo key={mv.detail.video} src={asset(mv.detail.video)} poster={asset(mv.detail.poster)} at={i === 0 ? elapsed - current.startSec : 0} playing={session.status === 'playing'} muted={muted} active={i === 0} /> : null,
+                )
+              : null}
             <div className={`absolute inset-0 place-items-center ${detail ? 'hidden' : 'grid'}`}>
               <motion.div key={current?.index} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, ease }} className="flex h-full w-full flex-col items-center justify-center pb-[18vh] pt-[12vh]">
                 <Figure className="h-[min(48vh,56vw)]" color="#E6EAF2" floor="#4A5261" />
