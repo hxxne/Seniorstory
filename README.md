@@ -1,32 +1,31 @@
-# React + TypeScript + Vite
+# 시니어스토리 (SeniorStory)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+요양기관을 위한 듀얼 스크린 어르신 운동 프로그램 관제 플랫폼.
+Vite + React 19 + TypeScript + Tailwind CSS 3 + Motion + React Router.
 
-Currently, two official plugins are available:
+## 실행
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## 화면
+
+| 경로 | 설명 |
+| --- | --- |
+| `/` | 메인 랜딩 페이지 |
+| `/login` | 기관 로그인 / 등록 (좌측 에디토리얼 브랜드 패널 + 우측 Double-Bezel 인증 워크스테이션) |
+| `/dashboard` | 통합 관제 홈 — 웰컴 배너, 하드웨어 런처, 오늘의 운동 스케줄, 출석 어르신 미니 카드, RingChart 실시간 요약 |
+| `/dashboard/seniors` | 어르신 명단 및 보안 관리 — 성함/질환 검색, 출석 카운터, 원터치 출석 토글, 성함 마스킹 |
+| `/dashboard/programs` | 맞춤형 운동 프로그램 처방 — 통합 프로그램 30분/50분, 4단계 커리큘럼, 기대 효과, 안전 가이드 |
+| `/dashboard/biometrics` | 바이오메트릭 — 인터랙티브 스파크라인 KPI 카드, 요일별 출석, 완수 상태 분포 |
+| `/tablet` | 요양보호사 태블릿 컨트롤러 — 재생/일시정지/다음 동작, 4단계 즉시 이동, 어르신별 상태 토글, 긴급 일시정지 |
+| `/tv` | 스마트 TV 화면 — 전체 화면 영상 영역, 브로드캐스트 HUD, 고대비 큐잉 자막 바, 긴급 휴식 오버레이 |
+
+## 동기화
+
+태블릿·TV·대시보드는 `localStorage` + `BroadcastChannel`로 같은 브라우저의 모든 창에서 실시간 동기화됩니다
+(`src/lib/store.ts`). 대시보드의 "스마트 TV 화면 열기 / 태블릿 컨트롤러 열기"는 각 화면을 별도 창으로 띄웁니다.
+
+데모 환경이며 서버 없이 동작합니다. 로그인 정보와 출석 기록은 브라우저에만 저장됩니다.
