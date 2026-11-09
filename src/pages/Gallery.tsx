@@ -1,16 +1,16 @@
 import { useState, type ReactNode } from 'react'
 import { motion } from 'motion/react'
-import { ArrowRight, ArrowUpRight, Check, Pause, Play, SkipForward } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, OctagonAlert, Pause, Play, SkipForward, Tablet, Tv } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Logo from '../components/Logo'
 import Figure from '../components/Figure'
-import RingChart from '../components/ui/RingChart'
-import Sparkline from '../components/ui/Sparkline'
+import { AreaChart, Avatar, Dot, MiniLine, StatusIcon, cx } from '../components/dash'
 import { CueBar } from '../components/ui/Primitives'
 import { kpis } from '../data/metrics'
-import { programs, stageDuration, toneClass, type Program } from '../data/programs'
+import { programs, stageDuration, type Program } from '../data/programs'
 import { todaySchedule } from '../data/schedule'
-import { seniors } from '../data/seniors'
+import { riskConditions, seniors } from '../data/seniors'
+import { asset } from '../lib/asset'
 
 const ease = [0.22, 1, 0.36, 1] as const
 
@@ -158,23 +158,38 @@ export default function Gallery() {
 }
 
 /* ------------------------------------------------------------------ */
-/* 미리보기: 각 화면을 실제 컴포넌트와 데이터로 축소해 그립니다          */
+/* 미리보기: 각 화면을 실제 부품과 데이터로 축소해 그립니다.             */
+/* 대시보드·태블릿·TV는 지금 화면과 같은 체계(DESIGN.md)를 씁니다         */
 /* ------------------------------------------------------------------ */
+
+const ramp = ['#C9D8FB', '#93B0F5', '#5C86EC', '#2F5FE3']
+const rampInk = ['#1E3F9E', '#1E3F9E', '#fff', '#fff']
+const shortTitle = (t: string) => t.split(' · ')[0]
 
 function TvLive() {
   return (
-    <div className="relative aspect-[16/10] bg-[radial-gradient(ellipse_at_30%_20%,#1E3A30_0%,#0A110E_65%)]">
+    <div className="font-dash relative aspect-[16/10]" style={{ background: 'radial-gradient(ellipse at 30% 20%, #2C1C1F 0%, #0B0D11 65%)' }}>
       <div className="absolute inset-x-4 top-3 flex items-start justify-between text-white">
         <div>
-          <p className="flex items-center gap-2 text-[11px] text-white/70">
-            <span className="h-2 w-2 rounded-full bg-coral" /> 송출 중 · 통합 프로그램 30분
+          <p className="flex items-center gap-1.5 text-[11px] text-white/70">
+            <span className="h-2 w-2 rounded-full bg-[#F06A6A]" /> 송출 중 · 통합 프로그램 30분
           </p>
-          <p className="mt-1 text-[15px] font-medium">3단계 · 근력 · 균형</p>
+          <p className="mt-1 text-[15px] font-semibold tracking-[-0.01em]">3단계 · 근력 · 균형</p>
+          <div className="mt-2 flex w-28 gap-1">
+            {[1, 1, 0.4, 0].map((v, i) => (
+              <span key={i} className="h-1 flex-1 overflow-hidden rounded-full bg-white/15">
+                <span className="block h-full rounded-full bg-tv-cue" style={{ width: `${v * 100}%` }} />
+              </span>
+            ))}
+          </div>
         </div>
-        <p className="tnum text-[22px] font-medium leading-none">07:42</p>
+        <div className="text-right">
+          <p className="text-[10px] text-white/60">남은 시간</p>
+          <p className="tnum text-[26px] font-semibold leading-none tracking-[-0.04em]">07:42</p>
+        </div>
       </div>
-      <div className="absolute inset-0 grid place-items-center pb-6">
-        <Figure className="!h-[52%]" />
+      <div className="absolute inset-0 grid place-items-center pb-6 pt-10">
+        <Figure className="!h-[48%]" color="#E6EAF2" floor="#4A5261" />
       </div>
       <div className="absolute inset-x-3 bottom-3">
         <CueBar className="!bg-black/85">의자 등받이를 잡고 천천히 일어나요</CueBar>
@@ -185,12 +200,12 @@ function TvLive() {
 
 function TvRest() {
   return (
-    <div className="flex aspect-[16/11] flex-col items-center justify-center bg-[#0E1512] px-4 text-center text-white">
+    <div className="font-dash flex aspect-[16/11] flex-col items-center justify-center bg-[#0B0D11] px-4 text-center text-white">
       <div className="relative grid place-items-center">
-        <span className="absolute h-24 w-24 animate-breathe rounded-full bg-moss-400/15" />
-        <span className="relative grid h-14 w-14 place-items-center rounded-full bg-moss-300 text-[13px] font-medium text-moss-900">휴식</span>
+        <span className="absolute h-24 w-24 animate-breathe rounded-full bg-white/10" />
+        <span className="relative grid h-14 w-14 place-items-center rounded-full bg-white text-[13px] font-semibold text-[#0B0D11]">휴식</span>
       </div>
-      <p className="mt-8 font-serif text-[24px] font-medium leading-tight">잠시 쉬어가요</p>
+      <p className="mt-8 text-[24px] font-semibold leading-tight tracking-[-0.03em]">잠시 쉬어가요</p>
       <p className="mt-2 text-[14px] font-semibold text-tv-cue">천천히 숨을 들이쉬고, 길게 내쉬어요</p>
     </div>
   )
@@ -198,9 +213,10 @@ function TvRest() {
 
 function TvIdle() {
   return (
-    <div className="flex aspect-[16/9] flex-col items-center justify-center bg-tv-bg text-center text-white">
-      <p className="tnum text-[56px] font-medium leading-none tracking-[-0.02em]">09:24</p>
-      <p className="mt-3 text-[12px] text-white/55">다음 운동</p>
+    <div className="font-dash flex aspect-[16/9] flex-col items-center justify-center bg-[#0B0D11] text-center text-white">
+      <Logo compact tone="neutral" inverse size={20} className="opacity-80" />
+      <p className="tnum mt-3 text-[56px] font-semibold leading-none tracking-[-0.04em]">09:24</p>
+      <p className="mt-4 w-2/3 border-t border-white/15 pt-3 text-[11px] text-white/55">다음 운동</p>
       <p className="mt-1 text-[14px] font-medium">09:30 · 통합 프로그램 30분</p>
     </div>
   )
@@ -210,113 +226,159 @@ function TabletCtl() {
   const program = programs[1]
   const people = seniors.slice(0, 6)
   const status = ['normal', 'normal', 'caution', 'normal', 'rest', 'normal'] as const
-  const tone = { normal: 'bg-moss-50 text-moss-700', caution: 'bg-amber-soft text-amber-deep', rest: 'bg-coral-soft text-coral-deep' }
+  const tile = { normal: 'border-d-line2 bg-white', caution: 'border-[#E3C277] bg-d-warnsoft', rest: 'border-[#E9A9A9] bg-d-badsoft' }
+  const tone = { normal: 'ok', caution: 'warn', rest: 'bad' } as const
   const label = { normal: '정상', caution: '주의', rest: '휴식' }
   return (
-    <div className="bg-sand-100 p-3 text-ink">
-      <div className="rounded-2xl bg-white p-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-[12px] text-coral-deep">3단계 · 힘 기르기</p>
-            <p className="mt-1 text-[18px] font-semibold">근력 · 균형</p>
-          </div>
-          <RingChart size={52} stroke={5} segments={[{ value: 0.4, color: '#2E7D5B', label: '진행' }]} total={1} animate={false}>
-            <span className="tnum text-[11px] font-medium">12:20</span>
-          </RingChart>
+    <div className="font-dash bg-white p-4 text-d-1">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="flex items-center gap-1.5 text-[11px] text-d-2">
+            <StatusIcon kind="progress" value={0.4} size={13} /> 3단계 · 힘 기르기
+          </p>
+          <p className="mt-1 text-[19px] font-semibold leading-tight tracking-[-0.02em]">근력 · 균형</p>
         </div>
-        <CueBar size="sm" className="mt-3">
-          무릎을 펴고 5초 버텨요
-        </CueBar>
-        <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
-          <div className="flex h-10 items-center justify-center gap-2 rounded-lg bg-ink text-[13px] font-medium text-white">
-            <Pause className="h-4 w-4" /> 일시정지
-          </div>
-          <div className="flex h-10 items-center gap-2 rounded-lg border border-ink/10 px-3 text-[13px] font-medium">
-            <SkipForward className="h-4 w-4" /> 다음 동작
-          </div>
+        <div className="text-right">
+          <p className="tnum text-[30px] font-semibold leading-none tracking-[-0.04em]">12:20</p>
+          <p className="mt-1 text-[10px] text-d-3">단계 남은 시간</p>
         </div>
       </div>
-      <div className="mt-2 grid grid-cols-4 gap-1">
+      <div className="mt-3 h-1 overflow-hidden rounded-full bg-d-line">
+        <div className="h-full w-[40%] rounded-full bg-d-a" />
+      </div>
+      <CueBar size="sm" className="mt-3">
+        무릎을 펴고 5초 버텨요
+      </CueBar>
+      <div className="mt-3 grid grid-cols-[1fr_auto] gap-1.5">
+        <div className="flex h-10 items-center justify-center gap-1.5 rounded-lg bg-d-1 text-[13px] font-medium text-white">
+          <Pause className="h-4 w-4 fill-current" /> 일시정지
+        </div>
+        <div className="flex h-10 items-center gap-1.5 rounded-lg border border-d-line2 px-3 text-[13px] font-medium">
+          <SkipForward className="h-4 w-4 text-d-3" /> 다음 동작
+        </div>
+      </div>
+      <div className="mt-3 grid grid-cols-4 gap-1">
         {program.stages.map((s, i) => (
-          <div key={s.id} className={`rounded-lg py-2 text-center text-[11px] font-medium ${i === 2 ? `${toneClass[s.tone].solid} text-white` : 'bg-white text-ink-3'}`}>
-            {s.order}단계
+          <div key={s.id} className={cx('rounded-lg border px-2 py-1.5 text-[11px]', i === 2 ? 'border-d-a bg-d-asoft font-medium' : 'border-d-line2 text-d-3')}>
+            <StatusIcon kind={i < 2 ? 'done' : i === 2 ? 'progress' : 'todo'} value={0.4} size={12} />
+            <p className="mt-1">{s.order}단계</p>
           </div>
         ))}
       </div>
-      <ul className="mt-2 grid grid-cols-2 gap-1">
+      <ul className="mt-3 grid grid-cols-2 gap-1">
         {people.map((p, i) => (
-          <li key={p.id} className={`flex items-center justify-between rounded-lg px-3 py-2 text-[12px] ${tone[status[i]]}`}>
-            <span className="font-medium">{p.name}</span>
-            <span>{label[status[i]]}</span>
+          <li key={p.id} className={cx('flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[12px]', tile[status[i]])}>
+            <Avatar name={p.name} size={18} />
+            <span className="flex-1 truncate font-medium">{p.name}</span>
+            <span className="inline-flex items-center gap-1 text-[11px]">
+              <Dot tone={tone[status[i]]} />
+              {label[status[i]]}
+            </span>
           </li>
         ))}
       </ul>
-      <div className="mt-2 flex h-10 items-center justify-center rounded-lg bg-coral text-[13px] font-medium text-white">전체 긴급 일시정지</div>
+      <div className="mt-3 flex h-10 items-center justify-center gap-1.5 rounded-lg bg-d-bad text-[13px] font-medium text-white">
+        <OctagonAlert className="h-4 w-4" /> 전체 긴급 일시정지
+      </div>
     </div>
   )
 }
 
 function DashHome() {
   const present = seniors.filter((s) => s.defaultPresent).length
+  const program = programs[0]
   return (
-    <div className="bg-sand-50 p-3 text-ink">
-      <div className="rounded-2xl border border-ink/[0.08] bg-white p-4">
-        <p className="text-[15px] font-semibold leading-snug">다음 운동 09:30 · 통합 프로그램 30분</p>
-        <p className="tnum mt-1 text-[12px] text-ink-3">
-          출석 {present} / {seniors.length}명 · 1층 다목적실
+    <div className="font-dash bg-white text-d-1">
+      <img src={asset('/landing/room.webp')} alt="" className="h-[72px] w-full object-cover" style={{ objectPosition: '50% 44%' }} />
+      <div className="px-4 pb-4">
+        <div className="relative -mt-4 grid h-9 w-9 place-items-center rounded-lg bg-white shadow-[0_0_0_1px_rgba(16,24,40,0.07),0_4px_10px_-3px_rgba(16,24,40,0.16)]">
+          <Logo compact tone="neutral" size={20} />
+        </div>
+        <p className="mt-2 text-[16px] font-semibold tracking-[-0.02em]">통합 관제 홈</p>
+        <p className="tnum mt-0.5 text-[11px] text-d-3">
+          출석 {present} / {seniors.length}명 · 스마트 TV 대기 · 오늘 완수 1회
         </p>
-        <div className="mt-3 flex h-9 items-center justify-center gap-2 rounded-lg bg-moss-600 text-[13px] font-medium text-white">
-          <Play className="h-4 w-4" /> 오늘의 운동 시작하기
+
+        <p className="mt-4 flex items-center gap-1.5 text-[11px] text-d-3">
+          <Dot tone="accent" /> <span className="font-medium text-d-1">다음 세션</span> 1층 다목적실
+        </p>
+        <div className="mt-1.5 flex items-end gap-3">
+          <p className="tnum text-[36px] font-semibold leading-[0.95] tracking-[-0.04em]">09:30</p>
+          <p className="pb-0.5 text-[13px] font-semibold">{program.name}</p>
         </div>
-      </div>
-      <div className="mt-2 grid grid-cols-[1.3fr_1fr] gap-2">
-        <div className="rounded-2xl border border-ink/[0.08] bg-white p-4">
-          <p className="text-[12px] font-medium">오늘의 운동 스케줄</p>
-          <ul className="mt-2 space-y-2">
-            {todaySchedule.map((s, i) => (
-              <li key={s.id} className="flex items-center gap-2 text-[11px]">
-                <span className="tnum w-8 text-ink-3">{s.time}</span>
-                <span className={`h-2 w-2 shrink-0 rounded-full ${i === 0 ? 'bg-moss-500' : 'border border-ink/20 bg-white'}`} />
-                <span className="truncate text-ink-2">{s.title.split(' · ')[0]}</span>
-              </li>
-            ))}
-          </ul>
+        <ol className="mt-3 flex gap-1">
+          {program.stages.map((s) => (
+            <li key={s.id} className="min-w-0" style={{ flex: `${stageDuration(s)} 1 0%` }}>
+              <div className="h-1 rounded-full bg-d-line" />
+              <p className="mt-1.5 flex items-center gap-1 text-[10px] text-d-2">
+                <StatusIcon kind="todo" size={11} />
+                <span className="truncate">{shortTitle(s.title)}</span>
+              </p>
+            </li>
+          ))}
+        </ol>
+        <div className="mt-3 flex gap-1.5">
+          <div className="flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md bg-d-a text-[12px] font-medium text-white">
+            <Play className="h-3.5 w-3.5 fill-current" /> 오늘의 운동 시작하기
+          </div>
+          <div className="grid h-8 w-8 place-items-center rounded-md border border-d-line2">
+            <Tv className="h-3.5 w-3.5 text-d-3" />
+          </div>
+          <div className="grid h-8 w-8 place-items-center rounded-md border border-d-line2">
+            <Tablet className="h-3.5 w-3.5 text-d-3" />
+          </div>
         </div>
-        <div className="grid place-items-center rounded-2xl border border-ink/[0.08] bg-white p-3">
-          <RingChart size={84} stroke={9} segments={[{ value: present, color: '#2E7D5B', label: '출석' }]} total={seniors.length} animate={false}>
-            <div className="text-center">
-              <p className="tnum text-[18px] font-semibold leading-none">{Math.round((present / seniors.length) * 100)}%</p>
-              <p className="mt-1 text-[11px] text-ink-3">출석률</p>
-            </div>
-          </RingChart>
-        </div>
+
+        <p className="mt-5 border-b border-d-line pb-1.5 text-[12px] font-semibold">
+          오늘 일정 <span className="tnum font-normal text-d-3">{todaySchedule.length}건</span>
+        </p>
+        <ul>
+          {todaySchedule.map((s, i) => (
+            <li key={s.id} className="flex h-7 items-center gap-2 border-b border-d-line text-[11px]">
+              <StatusIcon kind={i === 0 ? 'done' : 'todo'} size={12} />
+              <span className={cx('tnum w-8', i === 0 ? 'text-d-3' : 'font-medium')}>{s.time}</span>
+              <span className={cx('truncate', i === 0 ? 'text-d-3' : 'text-d-2')}>{shortTitle(s.title)}</span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   )
 }
 
 function SeniorsList() {
-  const rows = seniors.slice(0, 6)
+  const rows = seniors.filter((s) => s.defaultPresent).slice(0, 5)
   const present = seniors.filter((s) => s.defaultPresent).length
   return (
-    <div className="bg-white text-ink">
-      <div className="flex items-baseline justify-between border-b border-ink/[0.08] px-4 py-3">
-        <p className="text-[13px] font-medium">어르신 명단</p>
-        <p className="tnum text-[12px] text-ink-3">
-          출석 {present} / {seniors.length}명
+    <div className="font-dash bg-white px-4 pb-1 pt-3.5 text-d-1">
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="text-[16px] font-semibold tracking-[-0.02em]">어르신 명단</p>
+        <p className="tnum text-[11px] text-d-3">
+          등록 {seniors.length}명 · 출석 {present}명
         </p>
       </div>
-      <ul className="divide-y divide-ink/[0.08]">
+      <p className="-mx-4 mt-3 flex h-7 items-center gap-1.5 border-y border-d-line bg-d-side px-4 text-[11px] font-medium">
+        <StatusIcon kind="done" size={12} /> 출석 <span className="tnum font-normal text-d-3">{present}</span>
+      </p>
+      <ul>
         {rows.map((s) => (
-          <li key={s.id} className="flex items-center gap-3 px-4 py-2">
-            <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-medium ${s.defaultPresent ? 'bg-moss-100 text-moss-700' : 'bg-sand-100 text-ink-3'}`}>{s.name.slice(0, 1)}</span>
+          <li key={s.id} className="flex items-center gap-2.5 border-b border-d-line py-2 last:border-b-0">
+            <Avatar name={s.name} size={24} />
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-medium">{s.name}</p>
-              <p className="truncate text-[11px] text-ink-3">{s.conditions.join(' · ')}</p>
+              <p className="text-[12.5px] font-medium">
+                {s.name} <span className="tnum text-[11px] font-normal text-d-3">{s.age}세 · {s.room}호</span>
+              </p>
+              <p className="mt-1 flex flex-wrap gap-1">
+                {s.conditions.map((c) => (
+                  <span key={c} className="inline-flex h-[18px] items-center gap-1 rounded-full border border-d-line2 px-1.5 text-[10px] text-d-2">
+                    {riskConditions.has(c) ? <span className="h-1.5 w-1.5 rounded-full bg-d-bad" /> : null}
+                    {c}
+                  </span>
+                ))}
+              </p>
             </div>
-            <span className={`inline-flex h-7 items-center gap-1 rounded-md px-2 text-[11px] font-medium ${s.defaultPresent ? 'bg-moss-600 text-white' : 'border border-ink/10 text-ink-3'}`}>
-              {s.defaultPresent ? <Check className="h-3 w-3" strokeWidth={2.5} /> : null}
-              {s.defaultPresent ? '출석' : '미출석'}
+            <span className="relative h-4 w-7 shrink-0 rounded-full bg-d-a" aria-hidden>
+              <span className="absolute right-0.5 top-0.5 h-3 w-3 rounded-full bg-white" />
             </span>
           </li>
         ))}
@@ -326,54 +388,66 @@ function SeniorsList() {
 }
 
 function Bio() {
-  const [attendance, completion] = kpis
-  const last = attendance.series.length - 1
+  const pair = kpis.slice(0, 2)
+  const [attendance] = kpis
   return (
-    <div className="bg-sand-50 p-3 text-ink">
-      <div className="rounded-2xl border border-ink/[0.08] bg-white p-4">
-        <div className="flex items-baseline justify-between">
-          <p className="text-[12px] text-ink-2">{attendance.label}</p>
-          <p className="tnum text-[11px] text-moss-700">+{attendance.series[last] - attendance.series[last - 1]}% vs 전주</p>
-        </div>
-        <p className="tnum mt-1 text-[28px] font-semibold leading-none">
-          {attendance.series[last]}
-          <span className="ml-1 text-[14px] font-medium text-ink-3">%</span>
-        </p>
-        <div className="mt-6">
-          <Sparkline data={attendance.series} labels={attendance.labels} unit="%" color="#2E7D5B" target={attendance.target} height={64} />
-        </div>
+    <div className="font-dash bg-white text-d-1">
+      <div className="grid grid-cols-2 border-b border-d-line">
+        {pair.map((k, i) => {
+          const last = k.series.length - 1
+          return (
+            <div key={k.id} className={cx('relative px-4 py-3', i > 0 && 'border-l border-d-line')}>
+              {i === 0 ? <span className="absolute inset-x-0 top-0 h-0.5 bg-d-a" /> : null}
+              <p className={cx('text-[11px]', i === 0 ? 'font-medium' : 'text-d-2')}>{k.label}</p>
+              <div className="mt-1.5 flex items-end justify-between gap-2">
+                <p className="tnum text-[24px] font-semibold leading-none tracking-[-0.025em]">
+                  {k.series[last]}
+                  <span className="ml-0.5 text-[11px] font-normal tracking-normal text-d-3">{k.unit}</span>
+                </p>
+                <MiniLine data={k.series} color={i === 0 ? '#2F5FE3' : '#B9B9C0'} width={48} height={18} />
+              </div>
+              <p className="tnum mt-1.5 text-[10px] font-medium text-d-ok">
+                +{k.series[last] - k.series[last - 1]}%p <span className="font-normal text-d-3">전주 대비</span>
+              </p>
+            </div>
+          )
+        })}
       </div>
-      <div className="mt-2 flex items-baseline justify-between rounded-2xl border border-ink/[0.08] bg-white px-4 py-3">
-        <p className="text-[12px] text-ink-2">{completion.label}</p>
-        <p className="tnum text-[18px] font-semibold">{completion.series[last]}%</p>
+      <div className="px-4 pb-4 pt-5">
+        <AreaChart data={attendance.series} labels={attendance.labels} unit="%" target={attendance.target} height={112} />
       </div>
     </div>
   )
 }
 
 function ProgramCard({ program }: { program: Program }) {
-  const total = program.stages.reduce((a, s) => a + stageDuration(s), 0)
+  const first = program.id === 'p30'
   return (
-    <div className="bg-sand-100 p-5 text-ink">
-      <p className="text-[12px] text-moss-700">{program.tagline}</p>
-      <p className="mt-1 font-serif text-[22px] font-medium leading-tight">{program.name}</p>
-      <div className="mt-4 flex h-2 overflow-hidden rounded-full bg-white">
-        {program.stages.map((s) => (
-          <span key={s.id} className={toneClass[s.tone].solid} style={{ width: `${(stageDuration(s) / total) * 100}%` }} />
-        ))}
+    <div className="font-dash bg-white text-d-1">
+      <img src={asset(first ? '/landing/stretch.webp' : '/landing/hero.webp')} alt="" className="h-28 w-full object-cover" style={{ objectPosition: first ? '50% 30%' : '50% 42%' }} />
+      <div className="p-4">
+        <p className="text-[11px] font-medium text-d-a">{program.tagline}</p>
+        <p className="mt-1 text-[19px] font-semibold leading-tight tracking-[-0.02em]">{program.name}</p>
+        <div className="mt-3.5 flex gap-1">
+          {program.stages.map((s, i) => (
+            <span key={s.id} className="h-1.5 rounded-full" style={{ flex: `${stageDuration(s)} 1 0%`, background: ramp[i] }} />
+          ))}
+        </div>
+        <ol className="mt-2">
+          {program.stages.map((s, i) => (
+            <li key={s.id} className="flex h-8 items-center gap-2 border-b border-d-line text-[12.5px]">
+              <span className="tnum grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full text-[10px] font-semibold" style={{ background: ramp[i], color: rampInk[i] }}>
+                {s.order}
+              </span>
+              <span className="flex-1">{s.title}</span>
+              <span className="tnum text-[11px] text-d-3">{Math.round(stageDuration(s) / 60)}분</span>
+            </li>
+          ))}
+        </ol>
+        <p className="tnum mt-3 text-[11px] text-d-3">
+          동작 {program.stages.reduce((a, s) => a + s.moves.length, 0)}개 · 기대 효과 {program.effects.length}가지 · 안전 가이드 {program.safetyGuide.length}단계
+        </p>
       </div>
-      <ol className="mt-4 space-y-2">
-        {program.stages.map((s) => (
-          <li key={s.id} className="flex items-center gap-3 text-[13px]">
-            <span className={`tnum grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-medium text-white ${toneClass[s.tone].solid}`}>{s.order}</span>
-            <span className="flex-1 text-ink">{s.title}</span>
-            <span className="tnum text-ink-3">{Math.round(stageDuration(s) / 60)}분</span>
-          </li>
-        ))}
-      </ol>
-      <p className="tnum mt-4 border-t border-ink/[0.08] pt-3 text-[12px] text-ink-3">
-        동작 {program.stages.reduce((a, s) => a + s.moves.length, 0)}개 · 기대 효과 {program.effects.length}가지 · 안전 가이드 {program.safetyGuide.length}단계
-      </p>
     </div>
   )
 }
