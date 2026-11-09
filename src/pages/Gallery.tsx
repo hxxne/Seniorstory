@@ -3,7 +3,6 @@ import { motion } from 'motion/react'
 import { ArrowRight, ArrowUpRight, OctagonAlert, Pause, Play, SkipForward, Tablet, Tv } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Logo from '../components/Logo'
-import Figure from '../components/Figure'
 import { AreaChart, Avatar, Dot, MiniLine, StatusIcon, cx } from '../components/dash'
 import { CueBar } from '../components/ui/Primitives'
 import { kpis } from '../data/metrics'
@@ -168,32 +167,12 @@ const shortTitle = (t: string) => t.split(' · ')[0]
 
 function TvLive() {
   return (
-    <div className="font-dash relative aspect-[16/10]" style={{ background: 'radial-gradient(ellipse at 30% 20%, #2C1C1F 0%, #0B0D11 65%)' }}>
-      <div className="absolute inset-x-4 top-3 flex items-start justify-between text-white">
-        <div>
-          <p className="flex items-center gap-1.5 text-[11px] text-white/70">
-            <span className="h-2 w-2 rounded-full bg-[#F06A6A]" /> 송출 중 · 통합 프로그램 30분
-          </p>
-          <p className="mt-1 text-[15px] font-semibold tracking-[-0.01em]">3단계 · 근력 · 균형</p>
-          <div className="mt-2 flex w-28 gap-1">
-            {[1, 1, 0.4, 0].map((v, i) => (
-              <span key={i} className="h-1 flex-1 overflow-hidden rounded-full bg-white/15">
-                <span className="block h-full rounded-full bg-tv-cue" style={{ width: `${v * 100}%` }} />
-              </span>
-            ))}
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="text-[10px] text-white/60">남은 시간</p>
-          <p className="tnum text-[26px] font-semibold leading-none tracking-[-0.04em]">07:42</p>
-        </div>
-      </div>
-      <div className="absolute inset-0 grid place-items-center pb-6 pt-10">
-        <Figure className="!h-[48%]" color="#E6EAF2" floor="#4A5261" />
-      </div>
-      <div className="absolute inset-x-3 bottom-3">
-        <CueBar className="!bg-black/85">의자 등받이를 잡고 천천히 일어나요</CueBar>
-      </div>
+    <div className="font-dash relative aspect-video bg-[#0B0D11]">
+      <img src={asset('/videos/posters/sit-to-stand.jpg')} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      <p className="tnum absolute left-1/2 top-2 flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full bg-black/60 px-2.5 py-1 text-[10px] text-white/85">
+        <span className="h-1.5 w-1.5 rounded-full bg-[#F06A6A]" />
+        <span className="font-medium text-white">3단계 · 근력 · 균형</span> 동작 2 / 2 · 03:54
+      </p>
     </div>
   )
 }
@@ -234,7 +213,7 @@ function TabletCtl() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="flex items-center gap-1.5 text-[11px] text-d-2">
-            <StatusIcon kind="progress" value={0.4} size={13} /> 3단계 · 힘 기르기
+            <StatusIcon kind="progress" value={0.4} size={13} /> 3단계 · 다리 힘 기르기
           </p>
           <p className="mt-1 text-[19px] font-semibold leading-tight tracking-[-0.02em]">근력 · 균형</p>
         </div>
@@ -247,7 +226,7 @@ function TabletCtl() {
         <div className="h-full w-[40%] rounded-full bg-d-a" />
       </div>
       <CueBar size="sm" className="mt-3">
-        무릎을 펴고 5초 버텨요
+        다리를 차지 말고 천천히 움직여요
       </CueBar>
       <div className="mt-3 grid grid-cols-[1fr_auto] gap-1.5">
         <div className="flex h-10 items-center justify-center gap-1.5 rounded-lg bg-d-1 text-[13px] font-medium text-white">

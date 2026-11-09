@@ -3,7 +3,7 @@ import { ChevronLeft, LayoutDashboard, OctagonAlert, Pause, Play, RotateCcw, Ski
 import Logo from '../components/Logo'
 import { Avatar, Btn, Dot, StatusIcon, cx, statusLabel, statusTone, type StatusKind } from '../components/dash'
 import { CueBar } from '../components/ui/Primitives'
-import { programs, stageDuration } from '../data/programs'
+import { phaseAt, programs, stageDuration } from '../data/programs'
 import { seniors } from '../data/seniors'
 import { openTv } from '../lib/launch'
 import { cycleSeniorStatus, emergencyStop, endSession, gotoStage, nextMove, play, startProgram, togglePlay, useStore } from '../lib/store'
@@ -20,7 +20,8 @@ const tile = {
 /* 태블릿 컨트롤러: 대시보드와 같은 체계, 손가락 크기의 컨트롤 (56~64px) */
 export default function Tablet() {
   const attendance = useStore((s) => s.attendance)
-  const { session, program, stage, remaining, progress, current } = useStageClock(true)
+  const { session, program, stage, remaining, progress, current, elapsed } = useStageClock(true)
+  const phase = current ? phaseAt(current.move, elapsed - current.startSec) : null
   const present = seniors.filter((s) => attendance[s.id])
   const active = session.status !== 'idle'
   const playing = session.status === 'playing'
@@ -135,12 +136,28 @@ export default function Tablet() {
                         <span>{fmtClock(current.move.durationSec)}</span>
                       </p>
                       <CueBar size="lg" className="mt-2 !rounded-xl">
-                        {emergency ? '잠시 쉬어가요' : current.move.cue}
+                        {emergency ? '잠시 쉬어가요' : (phase?.cue ?? current.move.cue)}
                       </CueBar>
                       <div className="mt-2 h-1 overflow-hidden rounded-full bg-d-line">
                         <div className="h-full rounded-full bg-d-1 transition-[width] duration-500 ease-linear" style={{ width: `${current.progress * 100}%` }} />
                       </div>
-                      <p className="mt-2 text-[13px] text-d-3">다음: {stage.moves[current.index + 1]?.name ?? program.stages[session.stageIndex + 1]?.title ?? '세션 완료'}</p>
+                      {phase ? (
+                        <p className="tnum mt-2 text-[13px] text-d-2">
+                          {phase.resting ? (
+                            <>
+                              <span className="font-medium text-d-1">쉬는 시간 {phase.restLeft}초</span> · 다음은 {phase.set}세트
+                            </>
+                          ) : (
+                            <>
+                              <span className="font-medium text-d-1">
+                                {phase.set} / {phase.total}세트
+                              </span>{' '}
+                              · {current.move.detail?.perSet} · {phase.guide.head}
+                            </>
+                          )}
+                        </p>
+                      ) : null}
+                      <p className="mt-1 text-[13px] text-d-3">다음: {stage.moves[current.index + 1]?.name ?? program.stages[session.stageIndex + 1]?.title ?? '세션 완료'}</p>
                     </div>
                   ) : null}
 

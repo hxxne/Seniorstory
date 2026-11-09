@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Check, Maximize2, Pause } from 'lucide-react'
+import { Check, Maximize2, Pause, Volume2, VolumeX } from 'lucide-react'
 import Logo from '../components/Logo'
 import Figure from '../components/Figure'
-import { stageDuration } from '../data/programs'
+import { phaseAt, stageDuration } from '../data/programs'
 import { nextExercise } from '../data/schedule'
+import { asset } from '../lib/asset'
 import { useStore } from '../lib/store'
 import { fmtClock, useStageClock } from '../lib/useStageClock'
 
@@ -17,12 +18,50 @@ const toneBg = {
   ink: 'radial-gradient(ellipse at 30% 20%, #1D2029 0%, #0B0D11 65%)',
 } as const
 
+/** 동작 영상. 세션 시계가 기준이고, 영상은 그 시각을 따라갑니다 */
+function MoveVideo({ src, poster, at, playing, muted }: { src: string; poster: string; at: number; playing: boolean; muted: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null)
+
+  // 1.2초 넘게 벌어지면 시계에 맞춥니다 (일시정지 뒤 재개, 동작 건너뛰기, 늦게 연 TV 창)
+  useEffect(() => {
+    const v = ref.current
+    if (!v || v.readyState < 1) return
+    if (Math.abs(v.currentTime - at) > 1.2) v.currentTime = Math.max(0, Math.min(at, (v.duration || at) - 0.2))
+  }, [at])
+
+  useEffect(() => {
+    const v = ref.current
+    if (!v) return
+    v.muted = muted
+    if (playing) v.play().catch(() => {})
+    else v.pause()
+  }, [playing, muted])
+
+  return (
+    <video
+      ref={ref}
+      src={src}
+      poster={poster}
+      muted={muted}
+      playsInline
+      preload="auto"
+      onLoadedMetadata={(e) => {
+        e.currentTarget.currentTime = at
+        if (playing) e.currentTarget.play().catch(() => {})
+      }}
+      className="absolute inset-0 h-full w-full bg-black object-contain"
+    />
+  )
+}
+
 export default function TV() {
-  const { session, program, stage, remaining, progress, current } = useStageClock(true)
+  const { session, program, stage, remaining, progress, current, elapsed } = useStageClock(true)
   const attendance = useStore((s) => s.attendance)
   const presentCount = Object.values(attendance).filter(Boolean).length
   const [clock, setClock] = useState(() => new Date())
   const [cueIdx, setCueIdx] = useState(0)
+  // 브라우저는 누르기 전에는 소리 나는 영상을 틀어 주지 않습니다. 소리 없이 시작하고 버튼으로 켭니다
+  const [muted, setMuted] = useState(true)
 
   useEffect(() => {
     const id = window.setInterval(() => setClock(new Date()), 1000)
@@ -36,7 +75,9 @@ export default function TV() {
     return () => window.clearInterval(id)
   }, [session.status])
 
-  const cues = stage && current ? [current.move.cue, ...stage.cues] : []
+  // 영상 기반 동작은 지금 세트의 안내와 그 동작의 구령을, 쉬는 시간에는 휴식 안내만 돌립니다
+  const phase = current ? phaseAt(current.move, elapsed - current.startSec) : null
+  const cues = !stage || !current ? [] : phase ? (phase.resting ? [phase.cue] : [phase.cue, ...(current.move.detail?.cues ?? [])]) : [current.move.cue, ...stage.cues]
   const cue = cues.length ? cues[cueIdx % cues.length] : ''
 
   const fullscreen = () => {
@@ -45,6 +86,7 @@ export default function TV() {
   }
 
   const idle = session.status === 'idle'
+  const detail = current?.move.detail
   const next = nextExercise()
 
   return (
@@ -86,19 +128,47 @@ export default function TV() {
         ) : (
           /* ---------- 송출 화면 ---------- */
           <motion.div key="live" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }} className="absolute inset-0">
-            {/* 영상 영역 */}
-            <div className="absolute inset-0 grid place-items-center">
+            {/* 영상 영역: 영상이 있는 동작은 영상을, 없는 동작(호흡)은 실루엣을 보여 줍니다 */}
+            {detail && current ? <MoveVideo key={detail.video} src={asset(detail.video)} poster={asset(detail.poster)} at={elapsed - current.startSec} playing={session.status === 'playing'} muted={muted} /> : null}
+            <div className={`absolute inset-0 place-items-center ${detail ? 'hidden' : 'grid'}`}>
               <motion.div key={current?.index} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, ease }} className="flex h-full w-full flex-col items-center justify-center pb-[18vh] pt-[12vh]">
                 <Figure className="h-[min(48vh,56vw)]" color="#E6EAF2" floor="#4A5261" />
                 <p className="mt-6 text-[clamp(28px,4vw,56px)] font-medium">{current?.move.name}</p>
                 <p className="tnum mt-2 text-[clamp(16px,1.8vw,24px)] text-white/55">
                   동작 {current ? current.index + 1 : 0} / {stage?.moves.length ?? 0}
+                  {phase ? (phase.resting ? ` · 쉬는 시간 · 다음은 ${phase.set}세트` : ` · ${phase.set} / ${phase.total}세트 · ${current?.move.detail?.perSet}`) : ''}
                 </p>
               </motion.div>
             </div>
 
+            {/* 영상 위에는 영상 자체의 세트 표시와 자막이 있으므로, 가운데 위에 단계 정보만 얹습니다 */}
+            {detail && program && stage && current ? (
+              <div className="absolute left-1/2 top-[2.2vh] z-10 flex -translate-x-1/2 flex-col items-center gap-[1.2vh]">
+                <p className="tnum flex items-center gap-[1vw] whitespace-nowrap rounded-full bg-black/60 px-[1.6vw] py-[0.9vh] text-[clamp(12px,1.25vw,19px)] text-white/85 backdrop-blur">
+                  <span className={`h-[0.7vw] w-[0.7vw] min-h-2 min-w-2 rounded-full ${session.status === 'playing' ? 'animate-pulse bg-[#F06A6A]' : 'bg-[#F2B84B]'}`} />
+                  <span className="font-medium text-white">
+                    {session.stageIndex + 1}단계 · {stage.title}
+                  </span>
+                  <span>
+                    동작 {current.index + 1} / {stage.moves.length}
+                  </span>
+                  <span>단계 남은 시간 {fmtClock(remaining)}</span>
+                </p>
+                {muted ? (
+                  <button type="button" onClick={() => setMuted(false)} className="flex items-center gap-[0.6vw] rounded-full bg-white px-[1.6vw] py-[0.9vh] text-[clamp(13px,1.4vw,21px)] font-semibold text-[#0B0D11] shadow-[0_8px_24px_rgba(0,0,0,0.35)] hover:bg-[#F0F2F5]">
+                    <VolumeX className="h-[1.2em] w-[1.2em]" /> 소리 켜기
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+            {detail && !muted ? (
+              <button type="button" onClick={() => setMuted(true)} aria-label="소리 끄기" className="absolute right-16 top-4 z-50 grid h-10 w-10 place-items-center rounded-lg bg-white/10 text-white/70 opacity-0 transition-opacity hover:bg-white/20 hover:text-white focus-visible:opacity-100 group-hover:opacity-100">
+                <Volume2 className="h-4 w-4" />
+              </button>
+            ) : null}
+
             {/* 상단 브로드캐스트 HUD */}
-            {program && stage ? (
+            {program && stage && !detail ? (
               <header className="absolute inset-x-0 top-0 flex items-start justify-between gap-6 bg-gradient-to-b from-black/60 to-transparent px-[4vw] pb-[6vh] pt-[3vh]">
                 <div className="min-w-0">
                   <p className="flex items-center gap-3 text-[clamp(14px,1.5vw,20px)] text-white/70">
@@ -136,8 +206,8 @@ export default function TV() {
               ) : null}
             </AnimatePresence>
 
-            {/* 하단 큐잉 자막 바 (시그니처) */}
-            <footer className="absolute inset-x-0 bottom-0 px-[3vw] pb-[3vh]">
+            {/* 하단 큐잉 자막 바 (시그니처). 영상에는 자막이 들어 있어 겹치지 않게 뺍니다 */}
+            <footer className={`absolute inset-x-0 bottom-0 px-[3vw] pb-[3vh] ${detail ? 'hidden' : ''}`}>
               <div className="rounded-2xl bg-black/85 px-[3vw] py-[2.4vh] text-center">
                 <motion.p key={cue} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease }} className="text-[clamp(30px,4.6vw,66px)] font-semibold leading-[1.25] text-tv-cue">
                   {cue}

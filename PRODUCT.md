@@ -33,7 +33,8 @@ web
 - 스택: Vite, React 19, TypeScript, Tailwind CSS 3, Motion, React Router.
 - 데모 환경이다. 서버가 없고 상태는 브라우저의 localStorage와 BroadcastChannel로 창 사이에 동기화된다.
 - 어르신 상태는 정상, 주의, 휴식 세 가지다. 세션 상태는 대기, 송출 중, 일시정지, 긴급 일시정지, 완료다.
-- TV의 운동 영상은 아직 없고 실루엣 애니메이션이 자리를 대신한다.
+- 프로그램의 동작, 세트 구성, 세트별 안내 문구, 길이는 MediMove 완성 영상 8편을 분석해 넣은 것이다(`src/data/programs.ts`의 `exercises`). 준비·마무리 호흡만 영상이 없는 동작이다.
+- 영상 8편은 `public/videos/`에 있고, TV는 세션 시계에 맞춰 해당 동작의 영상을 재생한다(소리는 TV 화면의 「소리 켜기」를 눌러야 난다). 영상이 없는 호흡 동작만 실루엣 애니메이션을 쓴다.
 
 ## Brand Commitments
 

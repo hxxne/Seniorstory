@@ -25,6 +25,7 @@ export default function Programs() {
   const total = program.stages.reduce((a, s) => a + stageDuration(s), 0)
   const moves = program.stages.reduce((a, s) => a + s.moves.length, 0)
   const cover = covers[program.id] ?? covers.p30
+  const detailed = program.stages.flatMap((stage) => stage.moves.filter((mv) => mv.detail).map((mv) => ({ mv, stage })))
 
   const start = () => {
     startProgram(program.id, false)
@@ -81,7 +82,7 @@ export default function Programs() {
         <SectionHead title="4단계 진행 커리큘럼" count={`총 ${fmtClock(total)}`} />
         <ol className="mt-6 flex gap-1">
           {program.stages.map((s, i) => (
-            <li key={s.id} className="min-w-0" style={{ flex: `${stageDuration(s)} 1 0%` }}>
+            <li key={s.id} className="min-w-[72px]" style={{ flex: `${stageDuration(s)} 1 0%` }}>
               <div className="h-2 rounded-full" style={{ background: steps[i] }} />
               <p className="tnum mt-2 truncate text-[12px] text-d-3">
                 {s.order}단계 · {Math.round(stageDuration(s) / 60)}분
@@ -104,8 +105,11 @@ export default function Programs() {
               <p className="mt-1 min-h-[2.6em] text-[13px] leading-snug text-d-2">{s.goal}</p>
               <ul className="mt-4 border-t border-d-line">
                 {s.moves.map((mv) => (
-                  <li key={mv.name} className="flex h-9 items-center justify-between gap-2 border-b border-d-line text-[13.5px]">
-                    <span className="truncate">{mv.name}</span>
+                  <li key={mv.name} className="flex min-h-9 items-center justify-between gap-2 border-b border-d-line py-1.5 text-[13.5px]">
+                    <span className="min-w-0">
+                      <span className="block truncate">{mv.name}</span>
+                      {mv.detail ? <span className="tnum block truncate text-[12px] text-d-3">{mv.detail.dose}</span> : null}
+                    </span>
                     <span className="tnum shrink-0 text-[12px] text-d-3">{fmtClock(mv.durationSec)}</span>
                   </li>
                 ))}
@@ -117,6 +121,51 @@ export default function Programs() {
             </li>
           ))}
         </ol>
+      </section>
+
+      {/* 동작별 안내: 운동 영상에서 읽은 세트 구성과 세트마다 바뀌는 안내 문구 */}
+      <section className="mt-14">
+        <SectionHead title="동작별 진행 안내" count={`${detailed.length}개 동작`} aside="TV에 나가는 영상의 세트 구성과 안내 문구" />
+        <ul>
+          {detailed.map(({ mv, stage }) => {
+            const d = mv.detail
+            if (!d) return null
+            return (
+              <li key={mv.name} className="grid gap-x-8 gap-y-4 border-b border-d-line py-5 sm:grid-cols-[200px_minmax(0,1fr)] xl:grid-cols-[200px_232px_minmax(0,1fr)]">
+                <img src={asset(d.poster)} alt={`${mv.name} 영상의 한 장면`} loading="lazy" className="aspect-video w-full rounded-lg bg-d-side object-cover" />
+                <div className="min-w-0">
+                  <p className="text-[12px] text-d-3">
+                    {stage.order}단계 · {stage.title}
+                  </p>
+                  <h3 className="mt-1 text-[17px] font-semibold tracking-[-0.01em]">{mv.name}</h3>
+                  <p className="mt-2 flex flex-wrap gap-1">
+                    <Label>
+                      {d.area} · {d.focus}
+                    </Label>
+                    <Label>{d.posture}</Label>
+                  </p>
+                  <p className="tnum mt-3 text-[13.5px]">
+                    {d.dose} <span className="text-d-3">· {fmtClock(mv.durationSec)}</span>
+                  </p>
+                  <p className="mt-1 text-[13px] leading-snug text-d-3">{d.setup}</p>
+                </div>
+                <ol className="grid content-start gap-x-8 gap-y-4 sm:col-span-2 sm:grid-cols-3 xl:col-span-1">
+                  {d.guides.map((g, i) => (
+                    <li key={i} className="min-w-0">
+                      <p className="tnum flex items-center gap-1.5 text-[12px] text-d-3">
+                        <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full text-[10px] font-semibold" style={{ background: steps[i + 1], color: i > 0 ? '#fff' : '#1E3F9E' }}>
+                          {i + 1}
+                        </span>
+                        {i + 1}세트 · {g.head}
+                      </p>
+                      <p className="mt-1.5 text-[14px] leading-snug">{g.tip}</p>
+                    </li>
+                  ))}
+                </ol>
+              </li>
+            )
+          })}
+        </ul>
       </section>
 
       <div className="mt-14 grid gap-x-12 gap-y-12 lg:grid-cols-12">

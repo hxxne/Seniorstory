@@ -6,7 +6,7 @@ import Logo from '../../components/Logo'
 import { AreaChart, Avatar, Btn, CheckBox, Dot, Label, Page, SectionHead, StatusIcon, TextLink, cx, statusLabel, statusTone, type StatusKind } from '../../components/dash'
 import { CueBar } from '../../components/ui/Primitives'
 import { kpis } from '../../data/metrics'
-import { getProgram, stageDuration } from '../../data/programs'
+import { getProgram, phaseAt, stageDuration } from '../../data/programs'
 import { nextExercise, scheduleStatus, todaySchedule } from '../../data/schedule'
 import { riskConditions, seniors } from '../../data/seniors'
 import { asset } from '../../lib/asset'
@@ -22,7 +22,7 @@ export default function Home() {
   const attendance = useStore((s) => s.attendance)
   const completedToday = useStore((s) => s.completedSessionsToday)
   const onboarding = useStore((s) => s.onboarding)
-  const { session, program, stage, remaining, progress, current } = useStageClock(false)
+  const { session, program, stage, remaining, progress, current, elapsed } = useStageClock(false)
   const [checked, setChecked] = useState<Record<string, boolean>>({})
   const [clock, setClock] = useState(() => new Date())
 
@@ -191,7 +191,15 @@ export default function Home() {
           {/* 스마트 TV 미리보기: 실제 TV 화면의 축소판 */}
           <figure className="max-w-[560px] lg:max-w-none">
             <div className="relative aspect-video overflow-hidden rounded-xl bg-[#0B0D11] text-white shadow-[0_0_0_1px_rgba(16,24,40,0.1),0_18px_36px_-18px_rgba(16,24,40,0.45)]">
-              {live && stage && current ? (
+              {live && stage && current && current.move.detail && session.status !== 'emergency' ? (
+                <>
+                  <img src={asset(current.move.detail.poster)} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                  <p className="tnum absolute left-1/2 top-2 flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full bg-black/60 px-2.5 py-1 text-[10px] text-white/85">
+                    <Dot tone={session.status === 'playing' ? 'live' : 'warn'} pulse={session.status === 'playing'} />
+                    {session.stageIndex + 1}단계 · {current.move.name} · {fmtClock(remaining)}
+                  </p>
+                </>
+              ) : live && stage && current ? (
                 <>
                   <p className="absolute left-3.5 top-3 flex items-center gap-1.5 text-[11px] text-white/70">
                     <Dot tone={session.status === 'playing' ? 'live' : 'warn'} pulse={session.status === 'playing'} />
@@ -203,7 +211,7 @@ export default function Home() {
                   </div>
                   <div className="absolute inset-x-2.5 bottom-2.5">
                     <CueBar size="sm" className="!rounded-md !bg-black/80 !py-1.5 !text-[12px]">
-                      {session.status === 'emergency' ? '잠시 쉬어가요' : current.move.cue}
+                      {session.status === 'emergency' ? '잠시 쉬어가요' : (phaseAt(current.move, elapsed - current.startSec)?.cue ?? current.move.cue)}
                     </CueBar>
                   </div>
                 </>
