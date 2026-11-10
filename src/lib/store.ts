@@ -15,7 +15,6 @@ export interface Institution {
   phone?: string
   defaultProgram?: 'p30' | 'p50'
   slot?: string
-  specialties?: string[]
 }
 
 /** 첫 세션까지의 시작 체크리스트 */
@@ -83,11 +82,14 @@ function load(): AppState {
     const raw = localStorage.getItem(KEY)
     if (!raw) return initial()
     const parsed = JSON.parse(raw) as Partial<AppState>
+    const saved = { ...idleSession(), ...(parsed.session ?? {}) }
+    // 단계 수가 바뀌기 전에 저장된 세션이 없는 단계를 가리키면 대기 상태로 되돌립니다
+    const stages = getProgram(saved.programId)?.stages.length ?? 0
     return {
       ...initial(),
       ...parsed,
       onboarding: { ...freshOnboarding(), ...(parsed.onboarding ?? {}) },
-      session: { ...idleSession(), ...(parsed.session ?? {}) },
+      session: saved.programId && saved.stageIndex >= stages ? idleSession() : saved,
     }
   } catch {
     return initial()

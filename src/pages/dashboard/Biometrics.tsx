@@ -20,7 +20,7 @@ export default function Biometrics() {
 
   return (
     <Page>
-      <PageHead title="바이오메트릭" description="최근 12주의 출석과 완수 기록입니다. 지표를 누르면 아래 차트가 바뀝니다" />
+      <PageHead title="운동 기록" description="최근 12주의 출석과 완수 기록입니다. 지표를 누르면 아래 차트가 바뀝니다" />
 
       {/* 지표 네 개: 누르면 큰 차트의 주제가 됩니다 */}
       <div role="tablist" aria-label="지표 선택" className="grid grid-cols-2 border-y border-d-line lg:grid-cols-4">

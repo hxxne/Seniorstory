@@ -30,7 +30,7 @@ export const kpis: Kpi[] = [
     labels: weeks,
     target: 80,
     tone: 'amber',
-    description: '세션을 4단계까지 마친 어르신의 비율 (중도 휴식 제외)',
+    description: '마무리운동까지 마친 어르신의 비율 (중도 휴식 제외)',
   },
   {
     id: 'participants',

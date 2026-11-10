@@ -36,7 +36,7 @@ const screens: Screen[] = [
   { id: 'home', title: '통합 관제 홈', tag: '대시보드', cat: 'dashboard', to: '/dashboard', preview: <DashHome /> },
   { id: 'p30', title: '통합 프로그램 30분', tag: '프로그램', cat: 'program', to: '/dashboard/programs', preview: <ProgramCard program={programs[0]} /> },
   { id: 'tablet', title: '태블릿 컨트롤러', tag: '하드웨어', cat: 'hardware', to: '/tablet', preview: <TabletCtl /> },
-  { id: 'bio', title: '바이오메트릭', tag: '대시보드', cat: 'dashboard', to: '/dashboard/biometrics', preview: <Bio /> },
+  { id: 'bio', title: '운동 기록', tag: '대시보드', cat: 'dashboard', to: '/dashboard/biometrics', preview: <Bio /> },
   { id: 'tv-rest', title: '긴급 휴식 안내', tag: '하드웨어', cat: 'hardware', to: '/tv', preview: <TvRest /> },
   { id: 'seniors', title: '어르신 명단', tag: '대시보드', cat: 'dashboard', to: '/dashboard/seniors', preview: <SeniorsList /> },
   { id: 'p50', title: '통합 프로그램 50분', tag: '프로그램', cat: 'program', to: '/dashboard/programs', preview: <ProgramCard program={programs[1]} /> },
@@ -161,8 +161,8 @@ export default function Gallery() {
 /* 대시보드·태블릿·TV는 지금 화면과 같은 체계(DESIGN.md)를 씁니다         */
 /* ------------------------------------------------------------------ */
 
-const ramp = ['#C9D8FB', '#93B0F5', '#5C86EC', '#2F5FE3']
-const rampInk = ['#1E3F9E', '#1E3F9E', '#fff', '#fff']
+const ramp = ['#C9D8FB', '#93B0F5', '#2F5FE3']
+const rampInk = ['#1E3F9E', '#1E3F9E', '#fff']
 const shortTitle = (t: string) => t.split(' · ')[0]
 
 function TvLive() {
@@ -171,7 +171,7 @@ function TvLive() {
       <img src={asset('/videos/posters/sit-to-stand.jpg')} alt="" className="absolute inset-0 h-full w-full object-cover" />
       <p className="tnum absolute left-1/2 top-2 flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full bg-black/60 px-2.5 py-1 text-[10px] text-white/85">
         <span className="h-1.5 w-1.5 rounded-full bg-[#F06A6A]" />
-        <span className="font-medium text-white">3단계 · 근력 · 균형</span> 동작 2 / 2 · 03:54
+        <span className="font-medium text-white">2단계 · 본운동</span> 동작 4 / 4 · 03:54
       </p>
     </div>
   )
@@ -213,9 +213,9 @@ function TabletCtl() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="flex items-center gap-1.5 text-[11px] text-d-2">
-            <StatusIcon kind="progress" value={0.4} size={13} /> 3단계 · 다리 힘 기르기
+            <StatusIcon kind="progress" value={0.4} size={13} /> 2단계 · 다리 힘 기르기
           </p>
-          <p className="mt-1 text-[19px] font-semibold leading-tight tracking-[-0.02em]">근력 · 균형</p>
+          <p className="mt-1 text-[19px] font-semibold leading-tight tracking-[-0.02em]">본운동</p>
         </div>
         <div className="text-right">
           <p className="tnum text-[30px] font-semibold leading-none tracking-[-0.04em]">12:20</p>
@@ -236,10 +236,10 @@ function TabletCtl() {
           <SkipForward className="h-4 w-4 text-d-3" /> 다음 동작
         </div>
       </div>
-      <div className="mt-3 grid grid-cols-4 gap-1">
+      <div className="mt-3 grid grid-cols-3 gap-1">
         {program.stages.map((s, i) => (
-          <div key={s.id} className={cx('rounded-lg border px-2 py-1.5 text-[11px]', i === 2 ? 'border-d-a bg-d-asoft font-medium' : 'border-d-line2 text-d-3')}>
-            <StatusIcon kind={i < 2 ? 'done' : i === 2 ? 'progress' : 'todo'} value={0.4} size={12} />
+          <div key={s.id} className={cx('rounded-lg border px-2 py-1.5 text-[11px]', i === 1 ? 'border-d-a bg-d-asoft font-medium' : 'border-d-line2 text-d-3')}>
+            <StatusIcon kind={i < 1 ? 'done' : i === 1 ? 'progress' : 'todo'} value={0.4} size={12} />
             <p className="mt-1">{s.order}단계</p>
           </div>
         ))}

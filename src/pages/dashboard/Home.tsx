@@ -146,7 +146,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 4단계: 길이가 곧 시간 */}
+            {/* 3단계: 길이가 곧 시간 */}
             {shown ? (
               <ol className="mt-8 flex gap-1.5">
                 {shown.stages.map((s, i) => {
@@ -353,7 +353,7 @@ export default function Home() {
 
           {/* 5. 이번 주 */}
           <section>
-            <SectionHead title="출석률 추이" count="최근 12주" aside={<TextLink to="/dashboard/biometrics">바이오메트릭</TextLink>} />
+            <SectionHead title="출석률 추이" count="최근 12주" aside={<TextLink to="/dashboard/biometrics">운동 기록</TextLink>} />
             <dl className="mt-4 flex gap-10">
               {[attendanceKpi, completionKpi].map((k) => (
                 <div key={k.id}>

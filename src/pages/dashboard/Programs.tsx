@@ -10,7 +10,7 @@ import { fmtClock } from '../../lib/useStageClock'
 
 const tabs = programs.map((p) => [p.id, p.name] as const)
 // 단계가 뒤로 갈수록 한 단계씩 짙어지는 파랑: 색이 아니라 순서를 보여 줍니다
-const steps = ['#C9D8FB', '#93B0F5', '#5C86EC', '#2F5FE3']
+const steps = ['#C9D8FB', '#93B0F5', '#2F5FE3']
 const covers: Record<string, { src: string; pos: string }> = {
   p30: { src: '/landing/stretch.webp', pos: '50% 32%' },
   p50: { src: '/landing/hero.webp', pos: '50% 40%' },
@@ -43,7 +43,7 @@ export default function Programs() {
 
   return (
     <Page>
-      <PageHead title="운동 프로그램" description="통합 프로그램 두 가지 중에서 골라 처방합니다" actions={<Seg id="program-tab" label="프로그램 선택" value={id} options={tabs} onChange={setId} />} />
+      <PageHead title="운동 프로그램" description="통합 프로그램 두 가지 중에서 골라 시작합니다" actions={<Seg id="program-tab" label="프로그램 선택" value={id} options={tabs} onChange={setId} />} />
 
       {/* 개요 */}
       <section className="grid gap-x-12 gap-y-8 border-t border-d-line pt-8 lg:grid-cols-[minmax(0,1fr)_400px]">
@@ -77,9 +77,9 @@ export default function Programs() {
         </div>
       </section>
 
-      {/* 4단계 커리큘럼: 길이가 곧 시간인 타임라인 하나와 단계별 열 */}
+      {/* 3단계 진행 순서: 길이가 곧 시간인 타임라인 하나와 단계별 열 */}
       <section className="mt-14">
-        <SectionHead title="4단계 진행 커리큘럼" count={`총 ${fmtClock(total)}`} />
+        <SectionHead title={`${program.stages.length}단계 진행 순서`} count={`총 ${fmtClock(total)}`} />
         <ol className="mt-6 flex gap-1">
           {program.stages.map((s, i) => (
             <li key={s.id} className="min-w-[72px]" style={{ flex: `${stageDuration(s)} 1 0%` }}>
@@ -91,7 +91,7 @@ export default function Programs() {
           ))}
         </ol>
 
-        <ol className="mt-8 grid gap-x-10 gap-y-10 md:grid-cols-2 xl:grid-cols-4 xl:gap-x-8">
+        <ol className="mt-8 grid gap-x-8 gap-y-10 md:grid-cols-3">
           {program.stages.map((s, i) => (
             <li key={s.id} className="min-w-0">
               <p className="flex items-center gap-2 text-[12px] text-d-3">
@@ -153,7 +153,7 @@ export default function Programs() {
                   {d.guides.map((g, i) => (
                     <li key={i} className="min-w-0">
                       <p className="tnum flex items-center gap-1.5 text-[12px] text-d-3">
-                        <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full text-[10px] font-semibold" style={{ background: steps[i + 1], color: i > 0 ? '#fff' : '#1E3F9E' }}>
+                        <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full text-[10px] font-semibold" style={{ background: steps[i], color: i > 1 ? '#fff' : '#1E3F9E' }}>
                           {i + 1}
                         </span>
                         {i + 1}세트 · {g.head}

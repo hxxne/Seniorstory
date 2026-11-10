@@ -11,7 +11,7 @@ const titles: Record<string, string> = {
   '/dashboard': '관제 홈',
   '/dashboard/seniors': '어르신 관리',
   '/dashboard/programs': '운동 프로그램',
-  '/dashboard/biometrics': '바이오메트릭',
+  '/dashboard/biometrics': '운동 기록',
 }
 
 /* 대시보드 셸: 옅은 회색 사이드바(244px)와 흰 본문. 32px 내비 행, 44px 머리줄 */
@@ -33,7 +33,7 @@ export default function DashboardLayout() {
     { to: '/dashboard', label: '관제 홈', icon: House, end: true, count: null as string | null },
     { to: '/dashboard/seniors', label: '어르신 관리', icon: Users, count: `${present}/${seniors.length}` },
     { to: '/dashboard/programs', label: '운동 프로그램', icon: Activity, count: `${programs.length}` },
-    { to: '/dashboard/biometrics', label: '바이오메트릭', icon: ChartLine, count: null },
+    { to: '/dashboard/biometrics', label: '운동 기록', icon: ChartLine, count: null },
   ]
   const row = 'press flex h-8 w-full items-center gap-2.5 rounded-md px-2 text-[13.5px]'
   const idleRow = 'text-d-2 hover:bg-d-hover hover:text-d-1'

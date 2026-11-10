@@ -17,7 +17,7 @@ const ACCT =
   '출석을 체크한 어르신이 그대로 태블릿의 상태 카드가 되고, 태블릿의 조작이 그대로 TV 화면이 됩니다 — 요양보호사는 기록이 아니라 어르신에게 집중할 수 있습니다.'
 
 const HOTS = [
-  { left: '82%', top: '15%', label: '스마트 TV', value: '3단계 · 근력 · 균형' },
+  { left: '82%', top: '15%', label: '스마트 TV', value: '2단계 · 본운동' },
   { left: '85%', top: '33%', label: '태블릿', value: '재생 · 단계 · 긴급 정지' },
   { left: '55%', top: '52%', label: '좌식 변형', value: '휠체어도 함께 참여' },
   { left: '27%', top: '61%', label: '현재 동작', value: '팔 앞으로 뻗기' },
@@ -26,9 +26,9 @@ const HOTS = [
 const FEATS = [
   { label: '통합 관제 홈', to: '/dashboard' },
   { label: '어르신 명단 및 보안 관리', to: '/dashboard/seniors' },
-  { label: '맞춤형 운동 프로그램 처방', to: '/dashboard/programs' },
-  { label: '바이오메트릭', to: '/dashboard/biometrics' },
-  { label: '듀얼 스크린 터미널', to: '/tablet' },
+  { label: '운동 프로그램', to: '/dashboard/programs' },
+  { label: '운동 기록', to: '/dashboard/biometrics' },
+  { label: 'TV · 태블릿 화면', to: '/tablet' },
 ]
 
 const CARDS = [
@@ -37,15 +37,15 @@ const CARDS = [
     pos: '50% 40%',
     size: 'cover',
     label: '[통합 프로그램 30분]',
-    title: ['아침을 여는', '상체 가동성과 하체 운동'],
-    body: '어깨·가슴·등을 풀고 까치발 들기, 앉았다 일어서기로 이어지는 4단계 구성입니다.',
+    title: ['상체는 풀고,', '다리 힘은 기르고'],
+    body: '준비운동으로 몸을 풀고, 가슴 열기부터 앉았다 일어서기까지 본운동을 한 뒤 걷기로 마무리합니다.',
     to: '/dashboard/programs',
   },
   {
     img: IMG_D,
     pos: '60% 50%',
     size: 'cover',
-    label: '[듀얼 스크린]',
+    label: '[TV와 태블릿]',
     title: ['TV는 어르신을,', '태블릿은 요양보호사를'],
     body: '재생과 단계 이동, 어르신별 상태, 긴급 일시정지가 두 화면에 실시간으로 동기화됩니다.',
     to: '/tablet',
@@ -55,8 +55,8 @@ const CARDS = [
     pos: '38% 60%',
     size: 'auto 135%',
     label: '[통합 프로그램 50분]',
-    title: ['오후를 채우는', '하체 근력 · 보행 세션'],
-    body: '하체 근력 블록을 네 동작으로 늘리고, 세트마다 쉬운 동작을 함께 안내합니다.',
+    title: ['다리 운동을 더 길게,', '걷는 힘까지'],
+    body: '30분 구성에 다리 운동 두 가지를 더하고, 세트마다 쉬운 동작을 함께 안내합니다.',
     to: '/dashboard/programs',
   },
 ]
@@ -283,8 +283,8 @@ export default function Landing() {
     e.currentTarget.style.transform = ''
   }
 
-  // 스파크라인: 30분 프로그램의 단계별 시간 배분 (준비 → 가동 → 근력 → 마무리)
-  const xs = [18, 64, 135, 196]
+  // 스파크라인: 30분 프로그램의 단계별 시간 배분 (준비운동 → 본운동 → 마무리운동)
+  const xs = [26, 110, 192]
   const pts = stageMin.map((mnt, i) => [xs[i], 60 - (mnt / peak) * 50] as const)
   const poly = [[0, 58], ...pts, [214, 56]].map((p) => p.join(',')).join(' ')
   const peakIdx = stageMin.indexOf(peak)
@@ -359,7 +359,7 @@ export default function Landing() {
               <span className="cross" />
               <span className="chip">실시간 세션</span>
               <div className="data">
-                <pre>{'장소  1층 다목적실\n단계  3 / 4 · 근력 · 균형\n시간  통합 프로그램 30분'}</pre>
+                <pre>{'장소  1층 다목적실\n단계  2 / 3 · 본운동\n시간  통합 프로그램 30분'}</pre>
                 <span className="frame" />
               </div>
             </div>
@@ -420,7 +420,7 @@ export default function Landing() {
           <div className="layer l4" style={{ visibility: 'hidden' }}>
             <h2 className="cred">
               <span className="tag">✕ {p30.name}</span>
-              요양보호사 한 명이 안전하게 진행하는 4단계 커리큘럼
+              요양보호사 한 명이 안전하게 진행하는 3단계 운동
             </h2>
 
             <div className="ccard">
@@ -441,7 +441,7 @@ export default function Landing() {
                 <polyline points={poly} fill="none" stroke="#c6f35c" strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round" />
                 {pts.map((p, i) => (i === peakIdx ? <circle key={i} cx={p[0]} cy={p[1]} r="3.4" fill="#c6f35c" /> : <circle key={i} cx={p[0]} cy={p[1]} r="2.4" fill="#fff" />))}
               </svg>
-              <p className="foot">준비 · 가동 · 근력 · 마무리</p>
+              <p className="foot">준비운동 · 본운동 · 마무리운동</p>
             </div>
 
             <ul className="feats">
@@ -468,7 +468,7 @@ export default function Landing() {
         <div className="head">
           <div>
             <span className="chip">프로그램</span>
-            <h2>질환을 고려한 통합 커리큘럼</h2>
+            <h2>질환을 고려한 통합 운동 프로그램</h2>
           </div>
           <p>동작마다 3세트와 쉬는 시간, 어려우신 분을 위한 쉬운 동작까지. 치매·파킨슨·뇌졸중 재활 어르신이 한 공간에서 함께 참여할 수 있도록 설계했습니다.</p>
         </div>

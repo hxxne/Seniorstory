@@ -10,7 +10,7 @@ import { cycleSeniorStatus, emergencyStop, endSession, gotoStage, nextMove, play
 import { fmtClock, useStageClock } from '../lib/useStageClock'
 
 const ease = [0.22, 1, 0.36, 1] as const
-const ramp = ['#C9D8FB', '#93B0F5', '#5C86EC', '#2F5FE3']
+const ramp = ['#C9D8FB', '#93B0F5', '#2F5FE3']
 const tile = {
   normal: 'border-d-line2 bg-white',
   caution: 'border-[#E3C277] bg-d-warnsoft',
@@ -96,7 +96,7 @@ export default function Tablet() {
                 <div className="my-auto py-10 text-center">
                   <StatusIcon kind="done" size={56} className="mx-auto" />
                   <h2 className="mt-6 text-[28px] font-semibold tracking-[-0.02em]">오늘 운동을 모두 마쳤습니다</h2>
-                  <p className="tnum mt-2 text-d-2">참여 {Object.keys(session.seniorStatus).length}명 · 4단계 완수</p>
+                  <p className="tnum mt-2 text-d-2">참여 {Object.keys(session.seniorStatus).length}명 · 마무리운동까지 완수</p>
                   <div className="mt-8 flex justify-center gap-2">
                     <Btn size="xl" onClick={() => gotoStage(0)}>
                       <RotateCcw className="h-4 w-4 text-d-3" /> 처음부터 다시
@@ -181,11 +181,11 @@ export default function Tablet() {
                 </>
               )}
 
-              {/* 4단계 바로 이동 */}
+              {/* 단계 바로 이동 */}
               {program ? (
                 <div className="mt-8">
                   <p className="text-[13px] text-d-3">단계 바로 이동</p>
-                  <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  <div className="mt-2 grid grid-cols-3 gap-2">
                     {program.stages.map((s, i) => {
                       const on = i === session.stageIndex && session.status !== 'completed'
                       const past = i < session.stageIndex || session.status === 'completed'

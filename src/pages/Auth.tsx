@@ -28,10 +28,9 @@ interface Draft {
   password: string
   program: 'p30' | 'p50'
   slot: string
-  specialties: string[]
   agree: boolean
 }
-const emptyDraft: Draft = { name: '', type: '', capacity: '', manager: '', email: '', phone: '', password: '', program: 'p30', slot: '오전', specialties: [], agree: false }
+const emptyDraft: Draft = { name: '', type: '', capacity: '', manager: '', email: '', phone: '', password: '', program: 'p30', slot: '오전', agree: false }
 
 export default function Auth({ mode }: { mode: Mode }) {
   const navigate = useNavigate()
@@ -79,12 +78,10 @@ export default function Auth({ mode }: { mode: Mode }) {
         capacity: draft.capacity ? Number(draft.capacity) : undefined,
         defaultProgram: draft.program,
         slot: draft.slot,
-        specialties: draft.specialties,
       })
       navigate('/dashboard')
     }, 350)
   }
-  const toggleSpecialty = (s: string) => patch({ specialties: draft.specialties.includes(s) ? draft.specialties.filter((x) => x !== s) : [...draft.specialties, s] })
 
   return (
     <div className="grid min-h-screen bg-sand-50 text-ink lg:grid-cols-[1.05fr_1fr]">
@@ -246,13 +243,6 @@ export default function Auth({ mode }: { mode: Mode }) {
                                   </Chip>
                                 ))}
                               </Choice>
-                              <Choice label="특화 질환" optional>
-                                {specialties.map((s) => (
-                                  <Chip key={s} on={draft.specialties.includes(s)} onClick={() => toggleSpecialty(s)}>
-                                    {s}
-                                  </Chip>
-                                ))}
-                              </Choice>
                               <label className="flex cursor-pointer items-start gap-2 text-[14px] leading-snug text-ink-2">
                                 <input type="checkbox" required checked={draft.agree} onChange={(e) => patch({ agree: e.target.checked })} className="mt-0.5 h-4 w-4 rounded border-ink/20 accent-ink" />
                                 이용약관과 개인정보 처리방침에 동의합니다
@@ -338,7 +328,7 @@ function BrandPanel({ mode, draft, step }: { mode: Mode; draft: Draft; step: num
               )}
             </h2>
             <p className="mt-4 text-[16px] leading-relaxed text-white/75">
-              {mode === 'login' ? '출석, 처방, 듀얼 스크린 제어가 한 화면에서 이어집니다' : '입력하는 내용이 아래 기관 프로필에 그대로 채워집니다. 세 단계면 충분합니다'}
+              {mode === 'login' ? '출석 확인부터 운동 진행, TV와 태블릿 조작까지 한 화면에서 이어집니다' : '입력하는 내용이 아래 기관 프로필에 그대로 채워집니다. 세 단계면 충분합니다'}
             </p>
 
             {/* Double-Bezel 라이브 스펙 카드 */}
@@ -395,7 +385,6 @@ function BrandPanel({ mode, draft, step }: { mode: Mode; draft: Draft; step: num
                     <dl className="mt-4 space-y-2 border-t border-white/10 pt-4 text-[13px]">
                       <Row label="관리자" value={draft.manager.trim()} placeholder="2단계에서 입력" />
                       <Row label="기본 프로그램" value={step >= 2 && program ? `${program.name} · ${draft.slot}` : ''} placeholder="3단계에서 선택" />
-                      <Row label="특화 질환" value={draft.specialties.join(' · ')} placeholder="3단계에서 선택" />
                     </dl>
                   </>
                 )}
