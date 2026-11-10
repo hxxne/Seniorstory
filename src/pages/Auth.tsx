@@ -93,7 +93,7 @@ export default function Auth({ mode }: { mode: Mode }) {
       {/* ---------- 우측 인증 워크스테이션 ---------- */}
       <main className="flex min-h-screen flex-col px-6 py-6 md:px-12">
         <div className="flex items-center justify-between">
-          <Link to="/" aria-label="시니어스토리 홈" className="lg:invisible">
+          <Link to="/" aria-label="MediMove 홈" className="lg:invisible">
             <Logo />
           </Link>
           <Link to="/" className="inline-flex items-center gap-2 text-[14px] text-ink-3 transition-colors hover:text-ink">
@@ -316,7 +316,7 @@ function BrandPanel({ mode, draft, step }: { mode: Mode; draft: Draft; step: num
       <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/75 to-ink/25" />
 
       <div className="relative flex h-full flex-col justify-between p-10 xl:p-14">
-        <Link to="/" aria-label="시니어스토리 홈">
+        <Link to="/" aria-label="MediMove 홈">
           <Logo inverse />
         </Link>
 

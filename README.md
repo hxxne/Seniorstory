@@ -1,4 +1,4 @@
-# 시니어스토리 (SeniorStory)
+# MediMove
 
 요양기관을 위한 듀얼 스크린 어르신 운동 프로그램 관제 플랫폼.
 Vite + React 19 + TypeScript + Tailwind CSS 3 + Motion + React Router.

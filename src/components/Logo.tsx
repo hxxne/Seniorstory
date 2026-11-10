@@ -3,29 +3,41 @@ interface LogoProps {
   /** 어두운 배경 위 */
   inverse?: boolean
   compact?: boolean
-  /** 대시보드·태블릿·TV: 색을 뺀 중립 마크 */
+  /** 대시보드·태블릿·TV에서는 글자를 한 단계 작게 씁니다 */
   tone?: 'brand' | 'neutral'
   /** 마크 크기(px) */
   size?: number
 }
 
-/** 랜딩과 같은 육각 마크: 잉크 육각형 위에 라임색 사람 형상 */
+export const BRAND = 'MediMove'
+const RED = '#9E161C'
+const GOLD = '#C39D5E'
+
+/** MediMove 기호: 붉은 M 위에 금색 체크. 어두운 배경에서는 M만 흰색으로 바꿉니다 */
+export function LogoMark({ size = 28, inverse = false, className = '' }: { size?: number; inverse?: boolean; className?: string }) {
+  return (
+    <svg viewBox="5 2.5 50 50" width={size} height={size} className={`shrink-0 ${className}`} aria-hidden>
+      <path d="M5,45 V5 H18 L30,22 L42,5 H55 V45 H43 V22 L30,40 L17,22 V45 Z" fill={inverse ? '#FFFFFF' : RED} />
+      <path d="M30,40 L45,15 L55,25 L30,50 Z" fill={GOLD} />
+    </svg>
+  )
+}
+
+/** 글자 표지: Medi는 붉은색(어두운 배경에서는 흰색), Move는 금색 */
+export function Wordmark({ inverse = false, className = '' }: { inverse?: boolean; className?: string }) {
+  return (
+    <span className={`font-dash font-bold tracking-[-0.03em] ${className}`}>
+      <span style={{ color: inverse ? '#FFFFFF' : RED }}>Medi</span>
+      <span style={{ color: GOLD }}>Move</span>
+    </span>
+  )
+}
+
 export default function Logo({ className = '', inverse = false, compact = false, tone = 'brand', size = 28 }: LogoProps) {
-  const neutral = tone === 'neutral'
-  const hex = neutral ? (inverse ? '#FFFFFF' : '#1C1C1F') : inverse ? '#C6F35C' : '#10291A'
-  const figure = neutral ? (inverse ? '#0B0D11' : '#FFFFFF') : inverse ? '#10291A' : '#C6F35C'
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
-      <svg viewBox="0 0 32 32" width={size} height={size} className="shrink-0" aria-hidden>
-        <path d="M16 2l12 7v14l-12 7-12-7V9z" fill={hex} />
-        <g fill="none" stroke={figure} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="16" cy="9.5" r="2.1" fill={figure} stroke="none" />
-          <path d="M10.5 14l5.5 1.4 5.5-1.4" />
-          <path d="M16 15.5v4l-3 3.6" />
-          <path d="M16 19.5l3 3.6" />
-        </g>
-      </svg>
-      {!compact ? <span className={neutral ? `text-[15px] font-semibold tracking-[-0.01em] ${inverse ? 'text-white' : 'text-d-1'}` : `font-serif text-[19px] font-semibold tracking-[-0.02em] ${inverse ? 'text-white' : 'text-ink'}`}>시니어스토리</span> : null}
+      <LogoMark size={size} inverse={inverse} />
+      {!compact ? <Wordmark inverse={inverse} className={tone === 'neutral' ? 'text-[16px]' : 'text-[20px]'} /> : null}
     </span>
   )
 }

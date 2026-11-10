@@ -54,7 +54,7 @@ export default function Gallery() {
       <header className="sticky top-0 z-40 bg-[#101312]/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-8">
-            <Link to="/" aria-label="시니어스토리 홈">
+            <Link to="/" aria-label="MediMove 홈">
               <Logo inverse />
             </Link>
             <nav className="hidden items-center gap-6 text-[14px] text-white/60 md:flex">
@@ -149,7 +149,7 @@ export default function Gallery() {
       <footer className="border-t border-white/[0.08]">
         <div className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-4 px-6 py-8 text-[13px] text-white/45 md:flex-row">
           <Logo inverse />
-          <p>© 2026 시니어스토리 · contact@seniorstory.example</p>
+          <p>© 2026 MediMove · contact@medimove.example</p>
         </div>
       </footer>
     </div>

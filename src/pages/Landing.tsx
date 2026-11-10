@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import { programs, stageDuration } from '../data/programs'
 import './landing.css'
 import { asset } from '../lib/asset'
+import { LogoMark, Wordmark } from '../components/Logo'
 
-/* 이미지: 시니어스토리 전용으로 생성한 4장 (public/landing) */
+/* 이미지: MediMove 전용으로 생성한 4장 (public/landing) */
 
 const IMG_A = asset('/landing/hero.webp')
 const IMG_B = asset('/landing/room.webp')
@@ -294,17 +295,9 @@ export default function Landing() {
     <div className="msl" ref={root}>
       {/* 3. Navigation */}
       <header className="nav">
-        <Link to="/" className="logo" aria-label="시니어스토리 홈">
-          <svg viewBox="0 0 32 32" aria-hidden>
-            <path d="M16 2l12 7v14l-12 7-12-7V9z" fill="currentColor" />
-            <g fill="none" stroke="#c6f35c" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="16" cy="9.5" r="2.1" fill="#c6f35c" stroke="none" />
-              <path d="M10.5 14l5.5 1.4 5.5-1.4" />
-              <path d="M16 15.5v4l-3 3.6" />
-              <path d="M16 19.5l3 3.6" />
-            </g>
-          </svg>
-          시니어스토리
+        <Link to="/" className="logo" aria-label="MediMove 홈">
+          <LogoMark size={26} />
+          <Wordmark />
         </Link>
         <nav className="menu">
           <a href="#sol">프로그램</a>
@@ -503,7 +496,7 @@ export default function Landing() {
           ))}
         </div>
 
-        <p className="credit">© 2026 시니어스토리 · 이미지는 AI로 생성했습니다</p>
+        <p className="credit">© 2026 MediMove · 이미지는 AI로 생성했습니다</p>
       </section>
     </div>
   )

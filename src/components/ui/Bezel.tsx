@@ -10,7 +10,7 @@ interface BezelProps extends HTMLAttributes<HTMLDivElement> {
 
 /**
  * Double-Bezel 카드: 바깥 프레임(베젤) + 안쪽 패널.
- * 하드웨어 기기(TV·태블릿)의 베젤을 연상시키는 시니어스토리의 기본 컨테이너입니다.
+ * 하드웨어 기기(TV·태블릿)의 베젤을 연상시키는 MediMove의 기본 컨테이너입니다.
  * 바깥 28px, 안쪽 22px = 28 − 6px 패딩.
  */
 export default function Bezel({ children, className = '', innerClassName = '', tone = 'sand', ...rest }: BezelProps) {
