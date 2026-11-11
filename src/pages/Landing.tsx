@@ -12,7 +12,7 @@ const IMG_B = asset('/landing/room.webp')
 const IMG_C = asset('/landing/stretch.webp')
 const IMG_D = asset('/landing/tablet.webp')
 
-const VISION = [['TV는', '어르신을', '보고'], ['태블릿은'], ['요양보호사를', '봅니다']]
+const VISION = [['어르신은', 'TV를', '보고'], ['요양보호사는'], ['태블릿으로', '진행합니다']]
 const ACCT =
   '출석을 체크한 어르신이 그대로 태블릿의 상태 카드가 되고, 태블릿의 조작이 그대로 TV 화면이 됩니다 — 요양보호사는 기록이 아니라 어르신에게 집중할 수 있습니다.'
 
@@ -46,7 +46,7 @@ const CARDS = [
     pos: '60% 50%',
     size: 'cover',
     label: '[TV와 태블릿]',
-    title: ['TV는 어르신을,', '태블릿은 요양보호사를'],
+    title: ['어르신은 TV를 보고,', '요양보호사는 태블릿으로'],
     body: '재생과 단계 이동, 어르신별 상태, 긴급 일시정지가 두 화면에 실시간으로 동기화됩니다.',
     to: '/tablet',
   },
