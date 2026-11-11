@@ -80,6 +80,31 @@ export default function TV() {
     createRoom()
   }, [])
 
+  // 핸드폰이나 태블릿에 이 화면을 띄워 두면 얼마 뒤 화면이 꺼집니다. 보이는 동안에는 꺼지지 않게 잡아 둡니다
+  useEffect(() => {
+    if (!('wakeLock' in navigator)) return
+    let lock: WakeLockSentinel | null = null
+    let gone = false
+    const hold = () => {
+      if (document.visibilityState !== 'visible') return
+      navigator.wakeLock
+        .request('screen')
+        .then((l) => {
+          if (gone) void l.release()
+          else lock = l
+        })
+        .catch(() => {})
+    }
+    hold()
+    // 다른 앱에 갔다 오면 잠금이 풀리므로 돌아올 때 다시 잡습니다
+    document.addEventListener('visibilitychange', hold)
+    return () => {
+      gone = true
+      document.removeEventListener('visibilitychange', hold)
+      void lock?.release()
+    }
+  }, [])
+
   useEffect(() => {
     const id = window.setInterval(() => setClock(new Date()), 1000)
     return () => window.clearInterval(id)
@@ -109,12 +134,12 @@ export default function TV() {
   const next = nextExercise()
 
   return (
-    <div className="font-dash group relative h-screen w-screen select-none overflow-hidden bg-[#0B0D11] text-white" style={{ background: stage ? toneBg[stage.tone] : undefined }}>
+    <div className="font-dash group relative h-tv w-screen select-none overflow-hidden bg-[#0B0D11] text-white" style={{ background: stage ? toneBg[stage.tone] : undefined }}>
       <button
         type="button"
         onClick={fullscreen}
         aria-label="전체 화면"
-        className="absolute right-4 top-4 z-50 grid h-10 w-10 place-items-center rounded-lg bg-white/10 text-white/70 opacity-0 transition-opacity hover:bg-white/20 hover:text-white focus-visible:opacity-100 group-hover:opacity-100"
+        className="absolute right-4 top-4 z-50 grid h-10 w-10 place-items-center rounded-lg bg-white/10 text-white/70 opacity-0 transition-opacity hover:bg-white/20 hover:text-white focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
       >
         <Maximize2 className="h-4 w-4" />
       </button>
@@ -122,25 +147,29 @@ export default function TV() {
       <AnimatePresence mode="wait">
         {idle ? (
           /* ---------- 대기 화면 ---------- */
-          <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }} className="absolute inset-0 flex flex-col items-center justify-center p-10">
+          <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }} className="absolute inset-0 flex flex-col items-center p-[min(2.5rem,5vh)]">
+            {/* 위아래 빈칸이 남는 높이를 나눠 가집니다. 핸드폰처럼 낮은 화면에서는 빈칸이 줄고, 글자는 겹치지 않습니다 */}
+            <div className="min-h-0 flex-1" />
             <Logo inverse tone="neutral" size={36} className="[&>span]:!text-[22px]" />
-            <p className="tnum mt-10 text-[clamp(64px,12vw,160px)] font-semibold leading-none tracking-[-0.04em]">{clock.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })}</p>
-            <p className="mt-4 text-[clamp(18px,2.4vw,30px)] text-white/70">{clock.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' })}</p>
-            <div className="mt-12 w-[min(720px,80vw)] border-t border-white/15 pt-8 text-center">
-              <p className="text-[clamp(14px,1.4vw,18px)] text-white/55">다음 운동</p>
-              <p className="mt-1 text-[clamp(20px,2.6vw,34px)] font-medium">{next ? `${next.time} · ${next.title}` : '오늘 예정된 운동이 없습니다'}</p>
-              <p className="mt-2 text-[clamp(13px,1.3vw,17px)] text-white/55">출석 어르신 {presentCount}명 · 태블릿에서 재생을 누르면 화면이 켜집니다</p>
+            <p className="tnum mt-[min(2.5rem,4vh)] text-[clamp(48px,min(12vw,22vh),160px)] font-semibold leading-none tracking-[-0.04em]">{clock.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })}</p>
+            <p className="mt-[min(1rem,2vh)] text-[clamp(16px,min(2.4vw,5vh),30px)] text-white/70">{clock.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' })}</p>
+            <div className="mt-[min(3rem,5vh)] w-[min(720px,80vw)] border-t border-white/15 pt-[min(2rem,3.5vh)] text-center">
+              <p className="text-[clamp(13px,1.4vw,18px)] text-white/55">다음 운동</p>
+              <p className="mt-1 text-[clamp(18px,min(2.6vw,5.6vh),34px)] font-medium">{next ? `${next.time} · ${next.title}` : '오늘 예정된 운동이 없습니다'}</p>
+              <p className="mt-[min(0.5rem,1.2vh)] text-[clamp(13px,1.3vw,17px)] text-white/55">출석 어르신 {presentCount}명 · 태블릿에서 재생을 누르면 화면이 켜집니다</p>
             </div>
-            {sync.room ? (
-              <div className="absolute inset-x-0 bottom-[4vh] flex items-center justify-center gap-[1.6vw] text-[clamp(13px,1.3vw,17px)] text-white/55">
-                <span>태블릿 연결 코드</span>
-                <span className="tnum text-[clamp(22px,2.6vw,36px)] font-semibold tracking-[0.06em] text-white">{spaced(sync.room)}</span>
-                <span className="inline-flex items-center gap-2">
-                  <span className={`h-2 w-2 rounded-full ${sync.link === 'lost' ? 'bg-d-bad' : sync.controller ? 'bg-d-ok' : 'bg-white/30'}`} />
-                  {sync.link === 'lost' ? '인터넷 연결을 확인해 주세요' : sync.controller ? '태블릿 연결됨' : '태블릿의 「TV 연결」에 입력하세요'}
-                </span>
-              </div>
-            ) : null}
+            <div className="flex flex-1 items-end pt-[min(1.5rem,3vh)]">
+              {sync.room ? (
+                <div className="flex flex-wrap items-center justify-center gap-x-[max(12px,1.6vw)] gap-y-1 text-[clamp(13px,1.3vw,17px)] text-white/55">
+                  <span>태블릿 연결 코드</span>
+                  <span className="tnum text-[clamp(22px,2.6vw,36px)] font-semibold leading-tight tracking-[0.06em] text-white">{spaced(sync.room)}</span>
+                  <span className="inline-flex items-center gap-2">
+                    <span className={`h-2 w-2 rounded-full ${sync.link === 'lost' ? 'bg-d-bad' : sync.controller ? 'bg-d-ok' : 'bg-white/30'}`} />
+                    {sync.link === 'lost' ? '인터넷 연결을 확인해 주세요' : sync.controller ? '태블릿 연결됨' : '태블릿의 「TV 연결」에 입력하세요'}
+                  </span>
+                </div>
+              ) : null}
+            </div>
           </motion.div>
         ) : session.status === 'completed' ? (
           /* ---------- 완료 화면 ---------- */
@@ -199,6 +228,13 @@ export default function TV() {
               <button type="button" onClick={() => setMuted(true)} aria-label="소리 끄기" className="absolute right-16 top-4 z-50 grid h-10 w-10 place-items-center rounded-lg bg-white/10 text-white/70 opacity-0 transition-opacity hover:bg-white/20 hover:text-white focus-visible:opacity-100 group-hover:opacity-100">
                 <Volume2 className="h-4 w-4" />
               </button>
+            ) : null}
+
+            {/* 핸드폰을 세로로 들면 영상이 작게 나옵니다. 돌리라고 알려 줍니다 */}
+            {detail ? (
+              <p className="pointer-events-none absolute inset-x-0 bottom-[8vh] z-10 hidden justify-center px-6 [@media(orientation:portrait)_and_(max-width:640px)]:flex">
+                <span className="rounded-full bg-white/12 px-4 py-2 text-center text-[14px] text-white/80 backdrop-blur">가로로 돌리면 영상이 화면에 꽉 찹니다</span>
+              </p>
             ) : null}
 
             {/* 상단 브로드캐스트 HUD */}

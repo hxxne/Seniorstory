@@ -62,6 +62,11 @@
     background: #d6e2fd;
     color: #1c1c1f;
   }
+  /* TV 화면의 높이: 핸드폰 브라우저의 주소창을 뺀 높이를 쓰고, 이를 모르는 옛 브라우저는 100vh */
+  .h-tv {
+    height: 100vh;
+    height: 100dvh;
+  }
   /* 얇은 스크롤바 */
   .font-dash ::-webkit-scrollbar {
     width: 10px;
