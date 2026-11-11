@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { seniors } from '../data/seniors'
 import { getProgram, moveStartSec, stageDuration } from '../data/programs'
+import { now } from './clock'
 
 export type SeniorStatus = 'normal' | 'caution' | 'rest'
 export type SessionStatus = 'idle' | 'playing' | 'paused' | 'emergency' | 'completed'
@@ -49,12 +50,23 @@ export interface AppState {
   session: Session
   completedSessionsToday: number
   lastCountedSession: number | null
+  /** 다른 기기와 묶인 연결 코드. 이 기기에만 저장하고 서버로 보내지 않습니다 */
+  room: string | null
 }
+
+/** 연결된 기기끼리 함께 쓰는 부분 */
+export type Shared = Pick<AppState, 'session' | 'attendance' | 'completedSessionsToday' | 'lastCountedSession'>
+export const pickShared = (s: AppState): Shared => ({
+  session: s.session,
+  attendance: s.attendance,
+  completedSessionsToday: s.completedSessionsToday,
+  lastCountedSession: s.lastCountedSession,
+})
 
 const KEY = 'seniorstory:v1'
 const CHANNEL = 'seniorstory'
 
-const idleSession = (): Session => ({
+export const idleSession = (): Session => ({
   status: 'idle',
   programId: null,
   stageIndex: 0,
@@ -75,6 +87,7 @@ const initial = (): AppState => ({
   session: idleSession(),
   completedSessionsToday: 1,
   lastCountedSession: null,
+  room: null,
 })
 
 function load(): AppState {
@@ -112,10 +125,26 @@ function persist() {
   }
 }
 
+/** 이 기기에서 바뀐 내용을 다른 기기로 내보내는 통로 (sync.ts가 등록) */
+let outbound: ((prev: AppState, next: AppState) => void) | null = null
+export const onLocalChange = (fn: (prev: AppState, next: AppState) => void) => {
+  outbound = fn
+}
+
 function set(updater: (prev: AppState) => AppState) {
+  const prev = state
   const next = updater(state)
   if (next === state) return
   state = next
+  persist()
+  bc?.postMessage(state)
+  emit()
+  outbound?.(prev, next)
+}
+
+/** 다른 기기에서 온 내용을 반영합니다. 다시 내보내지 않습니다 */
+export function applyShared(shared: Shared) {
+  state = { ...state, ...shared }
   persist()
   bc?.postMessage(state)
   emit()
@@ -135,7 +164,7 @@ if (typeof window !== 'undefined') {
   })
 }
 
-const subscribe = (l: () => void) => {
+export const subscribe = (l: () => void) => {
   listeners.add(l)
   return () => {
     listeners.delete(l)
@@ -147,6 +176,8 @@ export function useStore<T>(selector: (s: AppState) => T): T {
 }
 
 export const getState = () => state
+
+export const setRoom = (room: string | null) => set((s) => (s.room === room ? s : { ...s, room }))
 
 /* ---------- 기관 ---------- */
 
@@ -187,7 +218,7 @@ export const setAllAttendance = (present: boolean) =>
 export function startProgram(programId: string, autoplay = true) {
   const program = getProgram(programId)
   if (!program) return
-  const now = Date.now()
+  const at = now()
   set((s) => ({
     ...s,
     onboarding: { ...s.onboarding, session: true },
@@ -195,8 +226,8 @@ export function startProgram(programId: string, autoplay = true) {
       ...idleSession(),
       status: autoplay ? 'playing' : 'paused',
       programId,
-      stageStartedAt: autoplay ? now : null,
-      startedAt: now,
+      stageStartedAt: autoplay ? at : null,
+      startedAt: at,
       seniorStatus: Object.fromEntries(
         seniors.filter((x) => s.attendance[x.id]).map((x) => [x.id, 'normal' as SeniorStatus]),
       ),
@@ -205,15 +236,15 @@ export function startProgram(programId: string, autoplay = true) {
 }
 
 /** 현재 단계의 총 경과 시간(초) */
-export function stageElapsed(session: Session, now = Date.now()) {
-  const live = session.status === 'playing' && session.stageStartedAt ? (now - session.stageStartedAt) / 1000 : 0
+export function stageElapsed(session: Session, at = now()) {
+  const live = session.status === 'playing' && session.stageStartedAt ? (at - session.stageStartedAt) / 1000 : 0
   return session.elapsedBeforePause + live
 }
 
 export const play = () =>
   set((s) => {
     if (s.session.status !== 'paused' && s.session.status !== 'emergency') return s
-    return { ...s, session: { ...s.session, status: 'playing', stageStartedAt: Date.now() } }
+    return { ...s, session: { ...s.session, status: 'playing', stageStartedAt: now() } }
   })
 
 export const pause = () =>
@@ -245,7 +276,7 @@ export function gotoStage(index: number) {
         status: resume ? 'playing' : s.session.status,
         stageIndex: clamped,
         elapsedBeforePause: 0,
-        stageStartedAt: resume ? Date.now() : null,
+        stageStartedAt: resume ? now() : null,
         completedAt: null,
       },
     }
@@ -259,7 +290,7 @@ function completed(s: AppState): AppState {
     ...s,
     completedSessionsToday: counted ? s.completedSessionsToday : s.completedSessionsToday + 1,
     lastCountedSession: s.session.startedAt,
-    session: { ...s.session, status: 'completed', stageStartedAt: null, elapsedBeforePause: 0, completedAt: Date.now() },
+    session: { ...s.session, status: 'completed', stageStartedAt: null, elapsedBeforePause: 0, completedAt: now() },
   }
 }
 
@@ -267,7 +298,7 @@ function toStage(s: AppState, index: number): AppState {
   const playing = s.session.status === 'playing'
   return {
     ...s,
-    session: { ...s.session, stageIndex: index, elapsedBeforePause: 0, stageStartedAt: playing ? Date.now() : null },
+    session: { ...s.session, stageIndex: index, elapsedBeforePause: 0, stageStartedAt: playing ? now() : null },
   }
 }
 
@@ -308,7 +339,7 @@ export function nextMove() {
       session: {
         ...s.session,
         elapsedBeforePause: Math.min(moveStartSec(stage, target), stageDuration(stage) - 1),
-        stageStartedAt: playing ? Date.now() : null,
+        stageStartedAt: playing ? now() : null,
       },
     }
   })

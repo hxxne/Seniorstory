@@ -1,7 +1,7 @@
-import { useState, type ChangeEvent, type ComponentType, type FormEvent, type InputHTMLAttributes, type ReactNode } from 'react'
+import { useRef, useState, type ChangeEvent, type ComponentType, type FormEvent, type InputHTMLAttributes, type ReactNode, type Ref } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { ArrowLeft, ArrowRight, Building2, Check, Clock, Eye, EyeOff, KeyRound, Mail, Phone, User, Users } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import Logo from '../components/Logo'
 import RingChart from '../components/ui/RingChart'
 import { Button } from '../components/ui/Primitives'
@@ -9,7 +9,8 @@ import { programs } from '../data/programs'
 import { nextExercise } from '../data/schedule'
 import { seniors, specialties } from '../data/seniors'
 import { asset } from '../lib/asset'
-import { registerInstitution, setInstitution, useStore, type Institution } from '../lib/store'
+import { emailProblem, hasAccount, passwordProblem, signIn, signUp } from '../lib/auth'
+import { useStore } from '../lib/store'
 
 type Mode = 'login' | 'signup'
 const ease = [0.22, 1, 0.36, 1] as const
@@ -26,31 +27,42 @@ interface Draft {
   email: string
   phone: string
   password: string
+  confirm: string
   program: 'p30' | 'p50'
   slot: string
   agree: boolean
 }
-const emptyDraft: Draft = { name: '', type: '', capacity: '', manager: '', email: '', phone: '', password: '', program: 'p30', slot: '오전', agree: false }
+const emptyDraft: Draft = { name: '', type: '', capacity: '', manager: '', email: '', phone: '', password: '', confirm: '', program: 'p30', slot: '오전', agree: false }
 
 export default function Auth({ mode }: { mode: Mode }) {
   const navigate = useNavigate()
+  const signedIn = useStore((s) => s.institution !== null)
   const last = useStore((s) => s.lastInstitution)
+  // 계정이 남아 있는 최근 접속 기관만 보여 줍니다
+  const recent = last && hasAccount(last.email) ? last : null
 
   /* ---------- 로그인 ---------- */
-  const [login, setLogin] = useState({ email: last?.email ?? '', password: '' })
+  const [login, setLogin] = useState({ email: recent?.email ?? '', password: '', keep: true })
+  const [loginError, setLoginError] = useState<{ field: 'email' | 'password' | 'form'; text: string } | null>(null)
   const [busy, setBusy] = useState(false)
+  const passwordInput = useRef<HTMLInputElement>(null)
 
-  const enter = (inst: Institution) => {
-    setBusy(true)
-    window.setTimeout(() => {
-      setInstitution(inst)
-      navigate('/dashboard')
-    }, 350)
-  }
-  const submitLogin = (e: FormEvent) => {
+  const submitLogin = async (e: FormEvent) => {
     e.preventDefault()
-    const known = last && last.email === login.email.trim() ? last : null
-    enter(known ?? { name: '행복한 요양원', manager: '관리자', email: login.email.trim() })
+    if (busy) return
+    const bad = emailProblem(login.email)
+    if (bad) return setLoginError({ field: 'email', text: bad })
+    setBusy(true)
+    setLoginError(null)
+    const result = await signIn(login.email, login.password, login.keep)
+    if (result === 'ok') return navigate('/dashboard')
+    setBusy(false)
+    if (result === 'no-account') setLoginError({ field: 'email', text: '등록되지 않은 이메일입니다. 기관 등록을 먼저 해 주세요' })
+    else if (result === 'wrong-password') {
+      setLoginError({ field: 'password', text: '비밀번호가 맞지 않습니다' })
+      passwordInput.current?.focus()
+      passwordInput.current?.select()
+    } else setLoginError({ field: 'form', text: '이 브라우저에서는 로그인할 수 없습니다. 주소가 https로 시작하는지 확인해 주세요' })
   }
 
   /* ---------- 등록 (3단계) ---------- */
@@ -64,12 +76,36 @@ export default function Auth({ mode }: { mode: Mode }) {
     setDir(n > step ? 1 : -1)
     setStep(n)
   }
-  const submitStep = (e: FormEvent) => {
+  type ErrKey = 'name' | 'manager' | 'email' | 'password' | 'confirm' | 'form'
+  const [errs, setErrs] = useState<Partial<Record<ErrKey, string>>>({})
+  const clear = (k: ErrKey) => setErrs((e) => (e[k] ? { ...e, [k]: undefined } : e))
+
+  /** 지금 단계의 입력을 검사해 문제를 돌려줍니다 */
+  const check = (): Partial<Record<ErrKey, string>> => {
+    const found: Partial<Record<ErrKey, string>> = {}
+    if (step === 0 && !draft.name.trim()) found.name = '기관명을 입력해 주세요'
+    if (step === 1) {
+      if (!draft.manager.trim()) found.manager = '관리자 성함을 입력해 주세요'
+      const mail = emailProblem(draft.email)
+      if (mail) found.email = mail
+      else if (hasAccount(draft.email)) found.email = '이미 등록된 이메일입니다. 기관 로그인에서 들어가 주세요'
+      const pw = passwordProblem(draft.password)
+      if (pw) found.password = pw
+      else if (draft.confirm !== draft.password) found.confirm = '비밀번호가 서로 다릅니다'
+    }
+    return found
+  }
+
+  const submitStep = async (e: FormEvent) => {
     e.preventDefault()
+    if (busy) return
+    const found = check()
+    setErrs(found)
+    if (Object.keys(found).length) return
     if (step < 2) return go(step + 1)
     setBusy(true)
-    window.setTimeout(() => {
-      registerInstitution({
+    const result = await signUp(
+      {
         name: draft.name.trim(),
         manager: draft.manager.trim(),
         email: draft.email.trim(),
@@ -78,10 +114,19 @@ export default function Auth({ mode }: { mode: Mode }) {
         capacity: draft.capacity ? Number(draft.capacity) : undefined,
         defaultProgram: draft.program,
         slot: draft.slot,
-      })
-      navigate('/dashboard')
-    }, 350)
+      },
+      draft.password,
+    )
+    if (result === 'ok') return navigate('/dashboard')
+    setBusy(false)
+    if (result === 'unsupported') return setErrs({ form: '이 브라우저에서는 등록할 수 없습니다. 주소가 https로 시작하는지 확인해 주세요' })
+    // 그 사이 같은 이메일이 등록됐거나 입력이 바뀐 경우: 계정 단계로 돌아가 알려 줍니다
+    go(1)
+    setErrs(result === 'email-taken' ? { email: '이미 등록된 이메일입니다. 기관 로그인에서 들어가 주세요' } : result === 'bad-email' ? { email: emailProblem(draft.email) ?? '' } : { password: passwordProblem(draft.password) ?? '' })
   }
+
+  // 이미 로그인한 상태에서 이 화면에 오면 대시보드로 보냅니다
+  if (signedIn && !busy) return <Navigate to="/dashboard" replace />
 
   return (
     <div className="grid min-h-screen bg-sand-50 text-ink lg:grid-cols-[1.05fr_1fr]">
@@ -126,38 +171,70 @@ export default function Auth({ mode }: { mode: Mode }) {
                     <p className="mt-2 text-[15px] text-ink-3">관리자 계정으로 대시보드에 접속합니다</p>
 
                     {/* 최근 접속 기관: 한 번에 계속하기 */}
-                    {last ? (
+                    {recent ? (
                       <button
                         type="button"
-                        onClick={() => enter(last)}
+                        onClick={() => {
+                          setLogin((l) => ({ ...l, email: recent.email }))
+                          setLoginError(null)
+                          passwordInput.current?.focus()
+                        }}
                         disabled={busy}
                         className="press mt-6 flex w-full items-center gap-3 rounded-xl border border-ink/10 bg-sand-50 p-3 text-left hover:border-ink/25"
                       >
-                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink font-serif text-[16px] font-medium text-lime">{last.name.slice(0, 1)}</span>
+                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink font-serif text-[16px] font-medium text-lime">{recent.name.slice(0, 1)}</span>
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[15px] font-medium">{last.name}</span>
-                          <span className="block truncate text-[13px] text-ink-3">최근 접속 · {last.manager}</span>
+                          <span className="block truncate text-[15px] font-medium">{recent.name}</span>
+                          <span className="block truncate text-[13px] text-ink-3">최근 접속 · {recent.manager}</span>
                         </span>
                         <span className="inline-flex items-center gap-1 text-[13px] font-medium text-ink-2">
-                          계속하기 <ArrowRight className="h-4 w-4" />
+                          비밀번호 입력 <ArrowRight className="h-4 w-4" />
                         </span>
                       </button>
                     ) : null}
 
-                    <form onSubmit={submitLogin} className="mt-6 space-y-4">
-                      <Field icon={Mail} label="이메일" type="email" placeholder="admin@institution.kr" autoComplete="email" value={login.email} onChange={(e) => setLogin((l) => ({ ...l, email: e.target.value }))} />
-                      <PasswordField label="비밀번호" autoComplete="current-password" value={login.password} onChange={(e) => setLogin((l) => ({ ...l, password: e.target.value }))} />
-                      <div className="flex items-center justify-between text-[14px]">
+                    <form onSubmit={submitLogin} noValidate className="mt-6 space-y-4">
+                      <Field
+                        icon={Mail}
+                        label="이메일"
+                        type="email"
+                        placeholder="admin@institution.kr"
+                        autoComplete="email"
+                        value={login.email}
+                        error={loginError?.field === 'email' ? loginError.text : undefined}
+                        onChange={(e) => {
+                          setLogin((l) => ({ ...l, email: e.target.value }))
+                          setLoginError(null)
+                        }}
+                      />
+                      <PasswordField
+                        ref={passwordInput}
+                        label="비밀번호"
+                        placeholder="비밀번호"
+                        autoComplete="current-password"
+                        value={login.password}
+                        error={loginError?.field === 'password' ? loginError.text : undefined}
+                        onChange={(e) => {
+                          setLogin((l) => ({ ...l, password: e.target.value }))
+                          setLoginError(null)
+                        }}
+                      />
+                      <div className="flex items-center justify-between gap-3 text-[14px]">
                         <label className="inline-flex cursor-pointer items-center gap-2 text-ink-2">
-                          <input type="checkbox" defaultChecked className="h-4 w-4 rounded border-ink/20 accent-ink" />
+                          <input type="checkbox" checked={login.keep} onChange={(e) => setLogin((l) => ({ ...l, keep: e.target.checked }))} className="h-4 w-4 rounded border-ink/20 accent-ink" />
                           이 기기 기억하기
                         </label>
-                        <button type="button" className="font-medium text-ink-2 underline decoration-ink/25 underline-offset-4 hover:decoration-ink">
-                          비밀번호 찾기
-                        </button>
+                        <Link to="/register" className="font-medium text-ink-2 underline decoration-ink/25 underline-offset-4 hover:decoration-ink">
+                          처음이면 기관 등록
+                        </Link>
                       </div>
-                      <Button type="submit" size="lg" className="w-full" disabled={busy}>
-                        {busy ? '접속 중' : '대시보드로 들어가기'}
+                      {loginError?.field === 'form' ? (
+                        <p role="alert" className="text-[14px] leading-snug text-coral-deep">
+                          {loginError.text}
+                        </p>
+                      ) : null}
+                      <Button type="submit" size="lg" className="w-full" disabled={busy || !login.email.trim() || !login.password}>
+                        {busy ? '확인하는 중' : '대시보드로 들어가기'}
                         {!busy ? <ArrowRight className="h-4 w-4" /> : null}
                       </Button>
                     </form>
@@ -185,12 +262,12 @@ export default function Auth({ mode }: { mode: Mode }) {
                       ))}
                     </ol>
 
-                    <form onSubmit={submitStep} className="mt-6">
+                    <form onSubmit={submitStep} noValidate className="mt-6">
                       <AnimatePresence mode="wait" initial={false} custom={dir}>
                         <motion.div key={step} initial={{ opacity: 0, x: dir * 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: dir * -16 }} transition={{ duration: 0.2, ease }}>
                           {step === 0 ? (
                             <StepBody title="어떤 기관인가요" hint="기관명은 대시보드와 기록에 표시됩니다">
-                              <Field icon={Building2} label="기관명" placeholder="행복한 요양원" autoComplete="organization" value={draft.name} onChange={field('name')} />
+                              <Field icon={Building2} label="기관명" placeholder="행복한 요양원" autoComplete="organization" maxLength={40} value={draft.name} error={errs.name} onChange={(e) => (field('name')(e), clear('name'))} />
                               <Choice label="기관 유형">
                                 {TYPES.map((t) => (
                                   <Chip key={t} on={draft.type === t} onClick={() => patch({ type: t })}>
@@ -202,10 +279,29 @@ export default function Auth({ mode }: { mode: Mode }) {
                             </StepBody>
                           ) : step === 1 ? (
                             <StepBody title="관리자 계정을 만듭니다" hint="이 계정으로 출석과 세션 기록을 관리합니다">
-                              <Field icon={User} label="관리자 성함" placeholder="홍길동" autoComplete="name" value={draft.manager} onChange={field('manager')} />
-                              <Field icon={Mail} label="이메일" type="email" placeholder="admin@institution.kr" autoComplete="email" value={draft.email} onChange={field('email')} />
+                              <Field icon={User} label="관리자 성함" placeholder="홍길동" autoComplete="name" maxLength={20} value={draft.manager} error={errs.manager} onChange={(e) => (field('manager')(e), clear('manager'))} />
+                              <Field icon={Mail} label="이메일" type="email" placeholder="admin@institution.kr" autoComplete="email" value={draft.email} error={errs.email} onChange={(e) => (field('email')(e), clear('email'))} />
                               <Field icon={Phone} label="기관 연락처" optional type="tel" placeholder="02-000-0000" autoComplete="tel" value={draft.phone} onChange={field('phone')} />
-                              <PasswordField label="비밀번호" autoComplete="new-password" minLength={8} value={draft.password} onChange={field('password')} hint={draft.password.length >= 8 ? '사용할 수 있는 길이입니다' : `8자 이상 · 현재 ${draft.password.length}자`} ok={draft.password.length >= 8} />
+                              <PasswordField
+                                label="비밀번호"
+                                placeholder="영문과 숫자를 넣어 8자 이상"
+                                autoComplete="new-password"
+                                value={draft.password}
+                                error={errs.password}
+                                onChange={(e) => (field('password')(e), clear('password'))}
+                                hint={!draft.password ? '영문과 숫자를 함께 넣어 8자 이상' : (passwordProblem(draft.password) ?? '쓸 수 있는 비밀번호입니다')}
+                                ok={!!draft.password && !passwordProblem(draft.password)}
+                              />
+                              <PasswordField
+                                label="비밀번호 확인"
+                                placeholder="한 번 더 입력"
+                                autoComplete="new-password"
+                                value={draft.confirm}
+                                error={errs.confirm}
+                                onChange={(e) => (field('confirm')(e), clear('confirm'))}
+                                hint={draft.confirm && draft.confirm === draft.password ? '비밀번호가 같습니다' : undefined}
+                                ok
+                              />
                             </StepBody>
                           ) : (
                             <StepBody title="운동은 어떻게 진행하나요" hint="나중에 대시보드에서 언제든 바꿀 수 있습니다">
@@ -252,13 +348,18 @@ export default function Auth({ mode }: { mode: Mode }) {
                         </motion.div>
                       </AnimatePresence>
 
+                      {errs.form ? (
+                        <p role="alert" className="mt-4 text-[14px] leading-snug text-coral-deep">
+                          {errs.form}
+                        </p>
+                      ) : null}
                       <div className="mt-6 flex gap-2">
                         {step > 0 ? (
                           <Button variant="secondary" size="lg" onClick={() => go(step - 1)}>
                             <ArrowLeft className="h-4 w-4" /> 이전
                           </Button>
                         ) : null}
-                        <Button type="submit" size="lg" className="flex-1" disabled={busy || (step === 0 && !draft.type)}>
+                        <Button type="submit" size="lg" className="flex-1" disabled={busy || (step === 0 && !draft.type) || (step === 2 && !draft.agree)}>
                           {busy ? '등록 중' : step < 2 ? '다음' : '등록하고 시작하기'}
                           {!busy ? <ArrowRight className="h-4 w-4" /> : null}
                         </Button>
@@ -270,7 +371,7 @@ export default function Auth({ mode }: { mode: Mode }) {
             </div>
           </div>
 
-          <p className="mt-5 text-center text-[13px] leading-relaxed text-ink-3">데모 환경입니다. 입력값은 이 브라우저에만 저장되며 서버로 전송되지 않습니다.</p>
+          <p className="mt-5 text-center text-[13px] leading-relaxed text-ink-3">계정은 이 브라우저에만 저장되고 서버로 보내지 않습니다. 다른 기기나 다른 브라우저에서는 다시 등록해야 합니다.</p>
         </div>
       </main>
     </div>
@@ -450,28 +551,38 @@ interface FieldProps extends InputHTMLAttributes<HTMLInputElement> {
   icon: ComponentType<{ className?: string }>
   label: string
   optional?: boolean
+  error?: string
 }
 
-const inputCls =
-  'h-11 w-full rounded-[10px] border border-ink/15 bg-white pl-10 text-[16px] text-ink placeholder:text-ink-3 transition-[border-color,box-shadow] duration-150 focus:border-ink focus:shadow-[0_0_0_3px_rgba(198,243,92,0.55)] focus:outline-none'
+const errorCls = 'border-coral focus:border-coral-deep focus:shadow-[0_0_0_3px_rgba(217,75,75,0.18)]'
 
-function Field({ icon: Icon, label, optional, id, ...rest }: FieldProps) {
+const inputCls =
+  'h-11 w-full rounded-[10px] border bg-white pl-10 text-[16px] text-ink placeholder:text-ink-3 transition-[border-color,box-shadow] duration-150 focus:outline-none'
+// 테두리 색은 상태에 따라 하나만 붙입니다 (둘을 함께 쓰면 어느 쪽이 이길지 정해지지 않습니다)
+const calmCls = 'border-ink/15 focus:border-ink focus:shadow-[0_0_0_3px_rgba(198,243,92,0.55)]'
+
+function Field({ icon: Icon, label, optional, error, id, ...rest }: FieldProps) {
   const fid = id ?? `f-${label}`
   return (
-    <label htmlFor={fid} className="block">
-      <span className="mb-2 block text-[14px] font-medium text-ink-2">
+    <div>
+      <label htmlFor={fid} className="mb-2 block text-[14px] font-medium text-ink-2">
         {label}
         {optional ? <span className="ml-1 font-normal text-ink-3">선택</span> : null}
-      </span>
+      </label>
       <span className="group relative block">
         <Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-3 transition-colors group-focus-within:text-ink" />
-        <input id={fid} required={!optional} className={`${inputCls} pr-4`} {...rest} />
+        <input id={fid} required={!optional} aria-invalid={error ? true : undefined} aria-describedby={error ? `${fid}-error` : undefined} className={`${inputCls} pr-4 ${error ? errorCls : calmCls}`} {...rest} />
       </span>
-    </label>
+      {error ? (
+        <p id={`${fid}-error`} role="alert" className="mt-2 text-[13px] leading-snug text-coral-deep">
+          {error}
+        </p>
+      ) : null}
+    </div>
   )
 }
 
-function PasswordField({ label, hint, ok, ...rest }: InputHTMLAttributes<HTMLInputElement> & { label: string; hint?: string; ok?: boolean }) {
+function PasswordField({ label, hint, ok, error, ref, ...rest }: InputHTMLAttributes<HTMLInputElement> & { label: string; hint?: string; ok?: boolean; error?: string; ref?: Ref<HTMLInputElement> }) {
   const [show, setShow] = useState(false)
   const fid = `f-${label}`
   return (
@@ -481,12 +592,18 @@ function PasswordField({ label, hint, ok, ...rest }: InputHTMLAttributes<HTMLInp
       </label>
       <span className="group relative block">
         <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-3 transition-colors group-focus-within:text-ink" />
-        <input id={fid} required type={show ? 'text' : 'password'} placeholder="8자 이상" className={`${inputCls} pr-11`} {...rest} />
+        <input id={fid} ref={ref} required type={show ? 'text' : 'password'} aria-invalid={error ? true : undefined} aria-describedby={error ? `${fid}-error` : undefined} className={`${inputCls} pr-11 ${error ? errorCls : calmCls}`} {...rest} />
         <button type="button" onClick={() => setShow((s) => !s)} aria-label={show ? '비밀번호 숨기기' : '비밀번호 보기'} aria-pressed={show} className="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-md text-ink-3 hover:bg-ink/5 hover:text-ink">
           {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
       </span>
-      {hint ? <p className={`tnum mt-2 text-[13px] ${ok ? 'text-lime-deep' : 'text-ink-3'}`}>{hint}</p> : null}
+      {error ? (
+        <p id={`${fid}-error`} role="alert" className="mt-2 text-[13px] leading-snug text-coral-deep">
+          {error}
+        </p>
+      ) : hint ? (
+        <p className={`tnum mt-2 text-[13px] ${ok ? 'text-lime-deep' : 'text-ink-3'}`}>{hint}</p>
+      ) : null}
     </div>
   )
 }

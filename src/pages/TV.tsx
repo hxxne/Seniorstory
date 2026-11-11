@@ -7,6 +7,8 @@ import { phaseAt, stageDuration } from '../data/programs'
 import { nextExercise } from '../data/schedule'
 import { asset } from '../lib/asset'
 import { useStore } from '../lib/store'
+import { createRoom, useSync } from '../lib/sync'
+import { spaced } from '../components/TvLink'
 import { fmtClock, useStageClock } from '../lib/useStageClock'
 
 const ease = [0.22, 1, 0.36, 1] as const
@@ -71,6 +73,12 @@ export default function TV() {
   const [cueIdx, setCueIdx] = useState(0)
   // 브라우저는 누르기 전에는 소리 나는 영상을 틀어 주지 않습니다. 소리 없이 시작하고 버튼으로 켭니다
   const [muted, setMuted] = useState(true)
+  const sync = useSync()
+
+  // 이 TV의 연결 코드를 만들어 둡니다. 다른 기기의 태블릿이 이 코드로 들어옵니다
+  useEffect(() => {
+    createRoom()
+  }, [])
 
   useEffect(() => {
     const id = window.setInterval(() => setClock(new Date()), 1000)
@@ -123,6 +131,16 @@ export default function TV() {
               <p className="mt-1 text-[clamp(20px,2.6vw,34px)] font-medium">{next ? `${next.time} · ${next.title}` : '오늘 예정된 운동이 없습니다'}</p>
               <p className="mt-2 text-[clamp(13px,1.3vw,17px)] text-white/55">출석 어르신 {presentCount}명 · 태블릿에서 재생을 누르면 화면이 켜집니다</p>
             </div>
+            {sync.room ? (
+              <div className="absolute inset-x-0 bottom-[4vh] flex items-center justify-center gap-[1.6vw] text-[clamp(13px,1.3vw,17px)] text-white/55">
+                <span>태블릿 연결 코드</span>
+                <span className="tnum text-[clamp(22px,2.6vw,36px)] font-semibold tracking-[0.06em] text-white">{spaced(sync.room)}</span>
+                <span className="inline-flex items-center gap-2">
+                  <span className={`h-2 w-2 rounded-full ${sync.link === 'lost' ? 'bg-d-bad' : sync.controller ? 'bg-d-ok' : 'bg-white/30'}`} />
+                  {sync.link === 'lost' ? '인터넷 연결을 확인해 주세요' : sync.controller ? '태블릿 연결됨' : '태블릿의 「TV 연결」에 입력하세요'}
+                </span>
+              </div>
+            ) : null}
           </motion.div>
         ) : session.status === 'completed' ? (
           /* ---------- 완료 화면 ---------- */

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getProgram, moveAt, stageDuration } from '../data/programs'
+import { now as clockNow } from './clock'
 import { advanceStage, stageElapsed, useStore } from './store'
 
 /**
@@ -8,18 +9,18 @@ import { advanceStage, stageElapsed, useStore } from './store'
  */
 export function useStageClock(autoAdvance = true) {
   const session = useStore((s) => s.session)
-  const [now, setNow] = useState(() => Date.now())
+  const [now, setNow] = useState(() => clockNow())
 
   useEffect(() => {
     if (session.status !== 'playing') return
-    const id = window.setInterval(() => setNow(Date.now()), 500)
+    const id = window.setInterval(() => setNow(clockNow()), 500)
     return () => window.clearInterval(id)
   }, [session.status])
 
   const program = getProgram(session.programId)
   const stage = program ? program.stages[session.stageIndex] : null
   const total = stage ? stageDuration(stage) : 0
-  const elapsed = stage ? Math.min(total, stageElapsed(session, session.status === 'playing' ? now : Date.now())) : 0
+  const elapsed = stage ? Math.min(total, stageElapsed(session, session.status === 'playing' ? now : clockNow())) : 0
   const remaining = Math.max(0, total - elapsed)
   const progress = total ? elapsed / total : 0
   const current = stage ? moveAt(stage, elapsed) : null

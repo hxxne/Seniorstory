@@ -2,11 +2,13 @@ import { AnimatePresence, motion } from 'motion/react'
 import { ChevronLeft, LayoutDashboard, OctagonAlert, Pause, Play, RotateCcw, SkipForward, Tv } from 'lucide-react'
 import Logo from '../components/Logo'
 import { Avatar, Btn, Dot, StatusIcon, cx, statusLabel, statusTone, type StatusKind } from '../components/dash'
+import TvLink from '../components/TvLink'
 import { CueBar } from '../components/ui/Primitives'
 import { phaseAt, programs, stageDuration } from '../data/programs'
 import { seniors } from '../data/seniors'
 import { openTv } from '../lib/launch'
 import { cycleSeniorStatus, emergencyStop, endSession, gotoStage, nextMove, play, startProgram, togglePlay, useStore } from '../lib/store'
+import { useSync } from '../lib/sync'
 import { fmtClock, useStageClock } from '../lib/useStageClock'
 
 const ease = [0.22, 1, 0.36, 1] as const
@@ -27,6 +29,10 @@ export default function Tablet() {
   const playing = session.status === 'playing'
   const emergency = session.status === 'emergency'
   const counts = (k: 'normal' | 'caution' | 'rest') => Object.values(session.seniorStatus).filter((v) => v === k).length
+  // 다른 기기의 TV와 묶여 있으면 실제 연결 상태를, 아니면 같은 브라우저의 TV 창을 가리킵니다
+  const sync = useSync()
+  const tvMissing = sync.room !== null && !sync.tv
+  const tvLabel = sync.link === 'lost' ? '연결 끊김 · 다시 시도 중' : tvMissing ? 'TV를 찾는 중' : playing ? 'TV 송출 중' : 'TV 연결됨'
 
   return (
     <div className="font-dash flex min-h-screen flex-col bg-white text-[15px] text-d-1">
@@ -40,9 +46,10 @@ export default function Tablet() {
         </div>
         <div className="flex items-center gap-1.5">
           <span className="mr-2 hidden items-center gap-1.5 text-[13px] text-d-2 sm:inline-flex">
-            <Dot tone={playing ? 'live' : 'ok'} pulse={playing} />
-            {playing ? 'TV 송출 중' : 'TV 연결됨'}
+            <Dot tone={sync.link === 'lost' ? 'bad' : tvMissing ? 'warn' : playing ? 'live' : 'ok'} pulse={playing && !tvMissing} />
+            {tvLabel}
           </span>
+          <TvLink />
           <Btn size="lg" onClick={openTv}>
             <Tv className="h-4 w-4 text-d-3" /> <span className="hidden sm:inline">TV 열기</span>
           </Btn>
