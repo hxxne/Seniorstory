@@ -1,7 +1,6 @@
 import { useSyncExternalStore } from 'react'
-import { getProgram } from '../data/programs'
 import { now, setClockOffset } from './clock'
-import { applyShared, getState, idleSession, onLocalChange, pickShared, setRoom, subscribe, type Session, type Shared } from './store'
+import { applyShared, freshSession, getState, idleSession, onLocalChange, pickShared, setRoom, subscribe, type Session, type Shared } from './store'
 
 /**
  * 서로 다른 기기(TV, 태블릿, 사무실 PC)를 연결 코드 하나로 묶습니다.
@@ -130,7 +129,8 @@ function diff(a: Json | undefined, b: Json | undefined, base: string, out: Obj) 
     for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) diff(a[k], b[k], base ? `${base}/${k}` : k, out)
     return
   }
-  if (a === b || (a == null && b == null)) return
+  const none = (v: Json | undefined) => v == null || (isObj(v) && Object.keys(v).length === 0)
+  if (a === b || (none(a) && none(b))) return
   if (b === undefined || b === null) out[base] = null
   else if (JSON.stringify(a) !== JSON.stringify(b)) out[base] = b
 }
@@ -152,9 +152,9 @@ function normalize(remote: Obj): Shared {
   const local = getState()
   const rs = isObj(r.session) ? r.session : {}
   const session = { ...idleSession(), ...(rs as unknown as Partial<Session>), seniorStatus: (isObj(rs.seniorStatus) ? rs.seniorStatus : {}) as Session['seniorStatus'] }
-  const stages = getProgram(session.programId)?.stages.length ?? 0
   return {
-    session: session.status !== 'idle' && session.stageIndex >= stages ? idleSession() : session,
+    // 서버에 남아 있던 옛 세션(어제 하다 만 것 등)은 대기로 되돌려 받습니다
+    session: freshSession(session),
     attendance: isObj(r.attendance) ? (r.attendance as Record<string, boolean>) : local.attendance,
     completedSessionsToday: typeof r.completedSessionsToday === 'number' ? r.completedSessionsToday : local.completedSessionsToday,
     lastCountedSession: typeof r.lastCountedSession === 'number' ? r.lastCountedSession : null,
@@ -301,11 +301,18 @@ function disconnect() {
 
 if (syncReady && typeof window !== 'undefined') {
   // 이 기기에서 바뀐 내용을 서버로
-  onLocalChange((prev, next) => {
+  onLocalChange((_prev, next) => {
     if (!room || !seeded) return
-    if (!complete(tree.state)) return pushAll()
+    if (!complete(tree.state)) {
+      // 빈 방을 채우는 것은 태블릿·PC의 일입니다. TV는 자기 상태를 올리지 않습니다
+      if (role() !== 'tv') pushAll()
+      return
+    }
+    // 이 기기의 지금 상태와 서버 사본을 비교해 다른 곳만 보냅니다.
+    // (직전 상태와 비교하면, 옛 세션을 대기로 되돌려 받은 뒤 서버에 남은 값이 지워지지 않습니다)
+    const { v: _mark, ...server } = tree.state
     const changes: Obj = {}
-    diff(pickShared(prev) as unknown as Json, pickShared(next) as unknown as Json, '', changes)
+    diff(server, pickShared(next) as unknown as Json, '', changes)
     const paths = Object.keys(changes)
     if (!paths.length) return
     for (const p of paths) setPath(tree.state, p, clone(changes[p]))

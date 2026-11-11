@@ -77,6 +77,26 @@ export const idleSession = (): Session => ({
   completedAt: null,
 })
 
+/** 세션이 시작된 지 이만큼 지났으면 끝난 것으로 봅니다 (프로그램은 길어야 50분) */
+const SESSION_MAX_MS = 3 * 60 * 60 * 1000
+/** 재생 중인 단계가 끝났어야 할 시각을 이만큼 넘겼으면 방치된 것으로 봅니다 */
+const OVERDUE_SEC = 10 * 60
+
+/**
+ * 방치된 세션을 대기 상태로 되돌립니다.
+ * 재생 중에 창을 닫으면 "재생 중"이 저장된 채로 남아, 며칠 뒤 화면을 열자마자 혼자 이어서 재생됩니다.
+ * 저장된 상태를 읽을 때와 다른 기기의 상태를 받을 때 이 함수를 거칩니다.
+ */
+export function freshSession(s: Session): Session {
+  if (s.status === 'idle') return s
+  const stage = getProgram(s.programId)?.stages[s.stageIndex]
+  if (!stage) return idleSession()
+  const t = now()
+  if (s.startedAt && t - s.startedAt > SESSION_MAX_MS) return idleSession()
+  if (s.status === 'playing' && s.stageStartedAt && s.elapsedBeforePause + (t - s.stageStartedAt) / 1000 > stageDuration(stage) + OVERDUE_SEC) return idleSession()
+  return s
+}
+
 const freshOnboarding = (): Onboarding => ({ dismissed: false, attendance: false, tv: false, tablet: false, session: false })
 
 const initial = (): AppState => ({
@@ -96,13 +116,11 @@ function load(): AppState {
     if (!raw) return initial()
     const parsed = JSON.parse(raw) as Partial<AppState>
     const saved = { ...idleSession(), ...(parsed.session ?? {}) }
-    // 단계 수가 바뀌기 전에 저장된 세션이 없는 단계를 가리키면 대기 상태로 되돌립니다
-    const stages = getProgram(saved.programId)?.stages.length ?? 0
     return {
       ...initial(),
       ...parsed,
       onboarding: { ...freshOnboarding(), ...(parsed.onboarding ?? {}) },
-      session: saved.programId && saved.stageIndex >= stages ? idleSession() : saved,
+      session: freshSession(saved),
     }
   } catch {
     return initial()
