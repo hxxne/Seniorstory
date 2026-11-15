@@ -24,9 +24,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      # 사이트는 자체 도메인(medimove.co.kr)의 맨 위 경로에 올라갑니다. 하위 경로를 붙이지 않습니다
       - run: npm run build
-        env:
-          VITE_BASE: /${{ github.event.repository.name }}/
       # 단일 페이지 앱: /dashboard 같은 주소로 바로 들어와도 앱이 뜨도록 404도 같은 문서로 둡니다
       - run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
