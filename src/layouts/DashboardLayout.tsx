@@ -1,4 +1,4 @@
-import { Activity, ArrowUpRight, ChartLine, House, LogOut, Tablet, Tv, Users } from 'lucide-react'
+import { Activity, ArrowUpRight, ChartLine, House, LogOut, Tablet, Tv, UserRound, Users } from 'lucide-react'
 import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
 import Logo from '../components/Logo'
 import { Avatar, Dot, StatusIcon, cx } from '../components/dash'
@@ -12,6 +12,7 @@ const titles: Record<string, string> = {
   '/dashboard/seniors': '어르신 관리',
   '/dashboard/programs': '운동 프로그램',
   '/dashboard/biometrics': '운동 기록',
+  '/dashboard/account': '계정',
 }
 
 /* 대시보드 셸: 옅은 회색 사이드바(244px)와 흰 본문. 32px 내비 행, 44px 머리줄 */
@@ -97,18 +98,25 @@ export default function DashboardLayout() {
 
         {/* 관리자 */}
         <div className="hidden items-center gap-2.5 border-t border-d-line px-2 pt-3 lg:mt-auto lg:flex">
-          <Avatar name={institution.manager} size={26} />
-          <div className="min-w-0 flex-1 leading-tight">
-            <p className="truncate text-[13px] font-medium">{institution.manager}</p>
-            <p className="truncate text-[12px] text-d-3">{institution.email}</p>
-          </div>
+          <NavLink to="/dashboard/account" title="계정" className={({ isActive }) => cx('-m-1 flex min-w-0 flex-1 items-center gap-2.5 rounded-md p-1 hover:bg-d-hover', isActive && 'bg-d-active')}>
+            <Avatar name={institution.manager} size={26} />
+            <span className="min-w-0 flex-1 leading-tight">
+              <span className="block truncate text-[13px] font-medium">{institution.manager}</span>
+              <span className="block truncate text-[12px] text-d-3">{institution.email}</span>
+            </span>
+          </NavLink>
           <button type="button" aria-label="로그아웃" title="로그아웃" onClick={logout} className="press grid h-7 w-7 shrink-0 place-items-center rounded-md text-d-3 hover:bg-d-hover hover:text-d-1">
             <LogOut className="h-4 w-4" />
           </button>
         </div>
-        <button type="button" aria-label="로그아웃" onClick={logout} className="press grid h-8 w-8 shrink-0 place-items-center rounded-md text-d-3 hover:bg-d-hover hover:text-d-1 lg:hidden">
-          <LogOut className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-0.5 lg:hidden">
+          <NavLink to="/dashboard/account" aria-label="계정" className={({ isActive }) => cx('press grid h-8 w-8 shrink-0 place-items-center rounded-md hover:bg-d-hover hover:text-d-1', isActive ? 'bg-d-active text-d-1' : 'text-d-3')}>
+            <UserRound className="h-4 w-4" />
+          </NavLink>
+          <button type="button" aria-label="로그아웃" onClick={logout} className="press grid h-8 w-8 shrink-0 place-items-center rounded-md text-d-3 hover:bg-d-hover hover:text-d-1">
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
       </aside>
 
       <div className="min-w-0">

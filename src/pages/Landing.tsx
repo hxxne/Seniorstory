@@ -4,6 +4,7 @@ import { programs, stageDuration } from '../data/programs'
 import './landing.css'
 import { asset } from '../lib/asset'
 import { LogoMark, Wordmark } from '../components/Logo'
+import SiteFooter from '../components/SiteFooter'
 
 /* 이미지: MediMove 전용으로 생성한 4장 (public/landing) */
 
@@ -496,7 +497,7 @@ export default function Landing() {
           ))}
         </div>
 
-        <p className="credit">© 2026 MediMove · 이미지는 AI로 생성했습니다</p>
+        <SiteFooter className="mt-6" />
       </section>
     </div>
   )

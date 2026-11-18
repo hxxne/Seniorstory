@@ -149,7 +149,7 @@ export default function Gallery() {
       <footer className="border-t border-white/[0.08]">
         <div className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-4 px-6 py-8 text-[13px] text-white/45 md:flex-row">
           <Logo inverse />
-          <p>© 2026 MediMove · contact@medimove.example</p>
+          <p>© 2026 MediMove</p>
         </div>
       </footer>
     </div>
@@ -424,7 +424,7 @@ function ProgramCard({ program }: { program: Program }) {
           ))}
         </ol>
         <p className="tnum mt-3 text-[11px] text-d-3">
-          동작 {program.stages.reduce((a, s) => a + s.moves.length, 0)}개 · 기대 효과 {program.effects.length}가지 · 안전 가이드 {program.safetyGuide.length}단계
+          동작 {program.stages.reduce((a, s) => a + s.moves.length, 0)}개 · 운동 목표 {program.effects.length}가지 · 안전 가이드 {program.safetyGuide.length}단계
         </p>
       </div>
     </div>
@@ -440,7 +440,7 @@ function AuthMini() {
           <br />
           하루가 움직입니다
         </p>
-        <p className="mt-2 text-[11px] text-white/55">기관 인증 계정 · 접근 로그 기록</p>
+        <p className="mt-2 text-[11px] text-white/55">계정은 이 기기에만 저장됩니다</p>
       </div>
       <div className="flex flex-col justify-center bg-sand-50 p-4">
         <div className="grid grid-cols-2 rounded-lg bg-sand-100 p-1 text-center text-[11px] font-medium">

@@ -49,7 +49,7 @@ export interface Program {
   tagline: string
   description: string
   stages: Stage[]
-  effects: { category: '의학적' | '신체적' | '정서·인지'; text: string }[]
+  effects: { category: '건강' | '신체적' | '정서·인지'; text: string }[]
   safetyGuide: { title: string; detail: string }[]
 }
 
@@ -327,8 +327,8 @@ export const programs: Program[] = [
     effects: [
       { category: '신체적', text: '어깨·가슴·등이 굳지 않게 유지하고 굽은 자세 완화' },
       { category: '신체적', text: '종아리·허벅지 근력 강화로 의자에서 일어서기가 수월해짐' },
-      { category: '의학적', text: '하체 근력 유지로 낙상 위험 요인 감소' },
-      { category: '의학적', text: '세트와 쉬는 시간을 나눈 저강도 구성으로 심박 부담 완화' },
+      { category: '건강', text: '하체 근력을 유지해 넘어질 위험을 줄이는 것이 목표' },
+      { category: '건강', text: '세트와 쉬는 시간을 나눈 저강도 구성으로 숨이 차지 않게 진행' },
       { category: '정서·인지', text: '구령에 맞춰 횟수를 세며 주의 집중과 참여 의욕 유지' },
     ],
     safetyGuide,
@@ -376,8 +376,8 @@ export const programs: Program[] = [
       },
     ],
     effects: [
-      { category: '의학적', text: '약 29분의 다리 근력 운동으로 근감소 진행을 늦추고 낙상 위험 요인 감소' },
-      { category: '의학적', text: '세트와 쉬는 시간을 나눈 구성으로 심박 부담 완화' },
+      { category: '건강', text: '약 29분의 다리 근력 운동으로 근력을 유지하고 넘어질 위험을 줄이는 것이 목표' },
+      { category: '건강', text: '세트와 쉬는 시간을 나눈 구성으로 숨이 차지 않게 진행' },
       { category: '신체적', text: '허벅지 앞·엉덩이·종아리 근력 강화로 걷기와 계단 오르기 보조' },
       { category: '신체적', text: '어깨·가슴·등이 굳지 않게 유지하고 굽은 자세 완화' },
       { category: '정서·인지', text: '좌우를 번갈아 세는 동작으로 주의 집중 유지' },

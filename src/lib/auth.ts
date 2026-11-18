@@ -1,4 +1,4 @@
-import { getState, logout, registerInstitution, setInstitution, type Institution } from './store'
+import { getState, logout, registerInstitution, resetAll, setInstitution, type Institution } from './store'
 
 /**
  * 기관 계정. 서버가 없어서 계정은 이 브라우저의 localStorage에만 있습니다.
@@ -130,6 +130,32 @@ export async function signUp(institution: Institution, password: string): Promis
   save([...list, { email, salt, hash, institution: profile, createdAt: Date.now() }])
   remember(true)
   registerInstitution(profile)
+  return 'ok'
+}
+
+export type DeleteResult = 'ok' | 'wrong-password' | 'unsupported'
+
+/**
+ * 비밀번호가 맞으면 이 기기에서 계정을 지우고, 출석·운동 기록·TV 연결까지 처음 상태로 돌립니다.
+ * 서버에 계정이 없으므로 이것으로 저장된 정보가 모두 사라집니다.
+ */
+export async function deleteAccount(email: string, password: string): Promise<DeleteResult> {
+  if (!supported()) return 'unsupported'
+  const account = find(email)
+  if (account) {
+    const hash = await derive(password, account.salt)
+    if (!sameText(hash, account.hash)) return 'wrong-password'
+  }
+  const rest = accounts().filter((a) => a.email !== normalizeEmail(email))
+  try {
+    if (rest.length) save(rest)
+    else localStorage.removeItem(KEY)
+    localStorage.removeItem(SESSION_ONLY)
+    document.cookie = `${ALIVE}=; path=${cookiePath()}; Max-Age=0; SameSite=Lax`
+  } catch {
+    /* noop */
+  }
+  resetAll()
   return 'ok'
 }
 

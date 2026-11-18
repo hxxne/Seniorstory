@@ -1,6 +1,6 @@
 import { useRef, useState, type ChangeEvent, type ComponentType, type FormEvent, type InputHTMLAttributes, type ReactNode, type Ref } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { ArrowLeft, ArrowRight, Building2, Check, Clock, Eye, EyeOff, KeyRound, Mail, Phone, User, Users } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Building2, Check, Clock, Eye, EyeOff, KeyRound, Mail, User, Users } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import Logo from '../components/Logo'
 import RingChart from '../components/ui/RingChart'
@@ -8,7 +8,7 @@ import { Button } from '../components/ui/Primitives'
 import { programs } from '../data/programs'
 import { nextExercise } from '../data/schedule'
 import { seniors, specialties } from '../data/seniors'
-import { asset } from '../lib/asset'
+import { appUrl, asset } from '../lib/asset'
 import { emailProblem, hasAccount, passwordProblem, signIn, signUp } from '../lib/auth'
 import { useStore } from '../lib/store'
 
@@ -25,14 +25,13 @@ interface Draft {
   capacity: string
   manager: string
   email: string
-  phone: string
   password: string
   confirm: string
   program: 'p30' | 'p50'
   slot: string
   agree: boolean
 }
-const emptyDraft: Draft = { name: '', type: '', capacity: '', manager: '', email: '', phone: '', password: '', confirm: '', program: 'p30', slot: '오전', agree: false }
+const emptyDraft: Draft = { name: '', type: '', capacity: '', manager: '', email: '', password: '', confirm: '', program: 'p30', slot: '오전', agree: false }
 
 export default function Auth({ mode }: { mode: Mode }) {
   const navigate = useNavigate()
@@ -109,7 +108,6 @@ export default function Auth({ mode }: { mode: Mode }) {
         name: draft.name.trim(),
         manager: draft.manager.trim(),
         email: draft.email.trim(),
-        phone: draft.phone.trim(),
         type: draft.type,
         capacity: draft.capacity ? Number(draft.capacity) : undefined,
         defaultProgram: draft.program,
@@ -281,7 +279,6 @@ export default function Auth({ mode }: { mode: Mode }) {
                             <StepBody title="관리자 계정을 만듭니다" hint="이 계정으로 출석과 세션 기록을 관리합니다">
                               <Field icon={User} label="관리자 성함" placeholder="홍길동" autoComplete="name" maxLength={20} value={draft.manager} error={errs.manager} onChange={(e) => (field('manager')(e), clear('manager'))} />
                               <Field icon={Mail} label="이메일" type="email" placeholder="admin@institution.kr" autoComplete="email" value={draft.email} error={errs.email} onChange={(e) => (field('email')(e), clear('email'))} />
-                              <Field icon={Phone} label="기관 연락처" optional type="tel" placeholder="02-000-0000" autoComplete="tel" value={draft.phone} onChange={field('phone')} />
                               <PasswordField
                                 label="비밀번호"
                                 placeholder="영문과 숫자를 넣어 8자 이상"
@@ -339,10 +336,26 @@ export default function Auth({ mode }: { mode: Mode }) {
                                   </Chip>
                                 ))}
                               </Choice>
-                              <label className="flex cursor-pointer items-start gap-2 text-[14px] leading-snug text-ink-2">
-                                <input type="checkbox" required checked={draft.agree} onChange={(e) => patch({ agree: e.target.checked })} className="mt-0.5 h-4 w-4 rounded border-ink/20 accent-ink" />
-                                이용약관과 개인정보 처리방침에 동의합니다
-                              </label>
+                              <div className="flex items-start gap-2 text-[14px] leading-snug text-ink-2">
+                                <input id="agree" type="checkbox" required checked={draft.agree} onChange={(e) => patch({ agree: e.target.checked })} className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-ink/20 accent-ink" />
+                                <p>
+                                  <label htmlFor="agree" className="cursor-pointer">
+                                    (필수){' '}
+                                  </label>
+                                  <a href={appUrl('/terms')} target="_blank" rel="noreferrer" className="font-medium text-ink underline underline-offset-4">
+                                    이용약관
+                                  </a>
+                                  <label htmlFor="agree" className="cursor-pointer">
+                                    과{' '}
+                                  </label>
+                                  <a href={appUrl('/privacy')} target="_blank" rel="noreferrer" className="font-medium text-ink underline underline-offset-4">
+                                    개인정보 처리방침
+                                  </a>
+                                  <label htmlFor="agree" className="cursor-pointer">
+                                    을 읽었고 동의합니다. 두 문서는 새 창으로 열립니다.
+                                  </label>
+                                </p>
+                              </div>
                             </StepBody>
                           )}
                         </motion.div>
@@ -372,6 +385,15 @@ export default function Auth({ mode }: { mode: Mode }) {
           </div>
 
           <p className="mt-5 text-center text-[13px] leading-relaxed text-ink-3">계정은 이 브라우저에만 저장되고 서버로 보내지 않습니다. 다른 기기나 다른 브라우저에서는 다시 등록해야 합니다.</p>
+          <p className="mt-2 text-center text-[13px] text-ink-3">
+            <Link to="/privacy" className="font-semibold text-ink-2 underline-offset-4 hover:underline">
+              개인정보 처리방침
+            </Link>
+            <span aria-hidden> · </span>
+            <Link to="/terms" className="text-ink-2 underline-offset-4 hover:underline">
+              이용약관
+            </Link>
+          </p>
         </div>
       </main>
     </div>
@@ -476,8 +498,8 @@ function BrandPanel({ mode, draft, step }: { mode: Mode; draft: Draft; step: num
                     <div className="mt-4 flex items-center gap-3">
                       <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-lime font-serif text-[18px] font-medium text-ink">{draft.name.trim().slice(0, 1) || '기'}</span>
                       <div className="min-w-0">
-                        <p className={`truncate font-serif text-[20px] font-medium leading-tight ${draft.name.trim() ? 'text-white' : 'text-white/35'}`}>{draft.name.trim() || '기관명'}</p>
-                        <p className={`mt-1 text-[13px] ${draft.type ? 'text-white/70' : 'text-white/35'}`}>
+                        <p className={`truncate font-serif text-[20px] font-medium leading-tight ${draft.name.trim() ? 'text-white' : 'text-white/60'}`}>{draft.name.trim() || '기관명'}</p>
+                        <p className={`mt-1 text-[13px] ${draft.type ? 'text-white/70' : 'text-white/60'}`}>
                           {draft.type || '기관 유형'}
                           {draft.capacity ? ` · 어르신 ${draft.capacity}명` : ''}
                         </p>
@@ -493,7 +515,7 @@ function BrandPanel({ mode, draft, step }: { mode: Mode; draft: Draft; step: num
             </div>
 
             <p className="mt-5 text-[13px] leading-relaxed text-white/55">
-              기관 인증 계정 · 접근 로그 기록
+              계정은 이 기기에만 저장됩니다
               <br />
               {specialties.join(' · ')}
             </p>
@@ -508,7 +530,7 @@ function Row({ label, value, placeholder }: { label: string; value: string; plac
   return (
     <div className="flex items-baseline justify-between gap-4">
       <dt className="shrink-0 text-white/55">{label}</dt>
-      <dd className={`truncate text-right ${value ? 'font-medium text-white' : 'text-white/35'}`}>{value || placeholder}</dd>
+      <dd className={`truncate text-right ${value ? 'font-medium text-white' : 'text-white/60'}`}>{value || placeholder}</dd>
     </div>
   )
 }

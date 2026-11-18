@@ -47,7 +47,7 @@ export default function Seniors() {
     <Page>
       <PageHead
         title="어르신 명단"
-        description={`등록 ${seniors.length}명 · 오늘 출석 ${present}명`}
+        description={`예시 명단 ${seniors.length}명 · 오늘 출석 ${present}명`}
         actions={
           <>
             <Btn variant="ghost" onClick={() => setAllAttendance(false)}>

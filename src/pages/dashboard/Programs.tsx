@@ -171,7 +171,7 @@ export default function Programs() {
       <div className="mt-14 grid gap-x-12 gap-y-12 lg:grid-cols-12">
         {/* 기대 효과 */}
         <section className="lg:col-span-5">
-          <SectionHead title="의학적 · 신체적 기대 효과" count={`${program.effects.length}가지`} />
+          <SectionHead title="운동 목표" count={`${program.effects.length}가지`} />
           <ul>
             {program.effects.map((e) => (
               <li key={e.text} className="flex items-start gap-3 border-b border-d-line py-3">
