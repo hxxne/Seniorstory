@@ -6,7 +6,7 @@ import { joinRoom, leaveRoom, syncReady, useSync, type JoinResult } from '../lib
 
 const problems: Record<Exclude<JoinResult, 'ok'>, string> = {
   'bad-code': '코드는 숫자 여섯 자리입니다',
-  'no-tv': '이 코드로 켜진 TV를 찾지 못했습니다. TV 화면의 코드를 다시 확인해 주세요',
+  'no-tv': '이 코드로 켜진 TV를 찾지 못했습니다. TV 화면의 코드를 다시 확인해 주세요',
   offline: '연결하지 못했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요',
 }
 
@@ -83,9 +83,9 @@ export default function TvLink() {
                   <p className="tnum mt-5 text-[34px] font-semibold leading-none tracking-[0.04em]">{spaced(sync.room ?? '')}</p>
                   <p className="mt-4 flex items-center gap-2 text-[14px] text-d-2">
                     <Dot tone={sync.link === 'lost' ? 'bad' : sync.tv ? 'ok' : 'warn'} />
-                    {sync.link === 'lost' ? '연결이 끊겨 다시 시도하고 있습니다' : sync.tv ? '이 코드의 TV가 켜져 있습니다' : '이 코드의 TV가 꺼져 있거나 아직 응답이 없습니다'}
+                    {sync.link === 'lost' ? '연결이 끊겨 다시 시도하고 있습니다' : sync.tv ? '이 코드의 TV가 켜져 있습니다' : '이 코드의 TV가 꺼져 있거나 아직 응답이 없습니다'}
                   </p>
-                  <p className="mt-2 text-[13px] leading-relaxed text-d-3">이 태블릿에서 재생, 일시정지, 단계 이동을 누르면 TV가 따라갑니다. 같은 와이파이가 아니어도 인터넷만 되면 됩니다.</p>
+                  <p className="mt-2 text-[13px] leading-relaxed text-d-3">이 태블릿에서 재생, 일시정지, 단계 이동을 누르면 TV가 따라갑니다. 같은 와이파이가 아니어도 인터넷만 되면 됩니다.</p>
                   <div className="mt-6 flex justify-end gap-2">
                     <Btn
                       size="lg"
@@ -103,7 +103,7 @@ export default function TvLink() {
                 </>
               ) : (
                 <form onSubmit={submit}>
-                  <p className="mt-2 text-[14px] leading-relaxed text-d-2">TV에서 이 사이트의 TV 화면을 열면 여섯 자리 코드가 보입니다. 그 코드를 입력해 주세요.</p>
+                  <p className="mt-2 text-[14px] leading-relaxed text-d-2">TV에서 이 사이트의 TV 화면을 열면 여섯 자리 코드가 보입니다. 그 코드를 입력해 주세요.</p>
                   <label htmlFor="tvlink-code" className="mt-5 block text-[13px] font-medium text-d-2">
                     연결 코드
                   </label>

@@ -144,7 +144,7 @@ export default function Seniors() {
               {present}
               <span className="ml-1.5 text-[14px] font-normal tracking-normal text-d-3">/ {seniors.length}명</span>
             </p>
-            {/* 한 사람이 한 칸 */}
+            {/* 한 사람이 한 칸 */}
             <ul className="mt-4 flex flex-wrap gap-1" aria-hidden>
               {seniors.map((s) => (
                 <li key={s.id} title={masked ? mask(s.name) : s.name} className={cx('h-2.5 w-2.5 rounded-full transition-colors duration-200', attendance[s.id] ? 'bg-d-a' : 'bg-d-line2')} />

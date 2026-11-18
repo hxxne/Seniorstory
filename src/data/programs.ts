@@ -97,7 +97,7 @@ export const exercises = {
       coach: '지훈',
       setup: '의자 앞쪽에 앉아 허리를 펴고, 어깨를 뒤로 아래로 내립니다',
       guides: [
-        { head: '이렇게 하세요', tip: '두 손은 머리 뒤에 가볍게 대고 날개뼈를 모아요' },
+        { head: '이렇게 하세요', tip: '두 손은 머리 뒤에 가볍게 대고 날개뼈를 모아요' },
         { head: '주의하세요', tip: '손으로 머리를 당기지 마세요' },
         { head: '어려우신 분은', tip: '팔꿈치를 조금만 벌려도 괜찮아요' },
       ],
@@ -350,7 +350,7 @@ export const programs: Program[] = [
         tone: 'moss',
         moves: [m('복식 호흡', 2, '배가 부풀도록 깊게 들이쉬어요'), ex.shoulderRoll],
         cues: ['오늘 컨디션은 어떠세요?', '의자 앞쪽에 앉아 주세요', '불편하면 손을 들어 주세요'],
-        caution: '시작 전에 어르신 전체의 안색과 호흡을 한 번씩 확인합니다',
+        caution: '시작 전에 어르신 전체의 안색과 호흡을 한 번씩 확인합니다',
       },
       {
         id: 'p50-2',
@@ -361,7 +361,7 @@ export const programs: Program[] = [
         tone: 'coral',
         moves: [ex.chestOpen, ex.trunkTwist, ex.kneeExtension, ex.heelRaise, ex.sitToStand, ex.hipExtension],
         cues: ['통증이 없는 범위까지만', '다리를 차지 말고 천천히', '의자 등받이를 꼭 잡아요', '힘들면 쉬운 동작으로 하세요', '아주 잘하고 계세요'],
-        caution: '서는 동작 두 가지는 요양보호사 1인당 어르신 3명 이내로 보조하고, 어지러우면 바로 앉혀 쉬게 합니다. 파킨슨 어르신은 동작이 바뀔 때 시간을 더 드립니다',
+        caution: '서는 동작 두 가지는 요양보호사 1인당 어르신 3명 이내로 보조하고, 어지러우면 바로 앉혀 쉬게 합니다. 파킨슨 어르신은 동작이 바뀔 때 시간을 더 드립니다',
       },
       {
         id: 'p50-3',

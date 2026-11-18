@@ -88,7 +88,7 @@ export default function Gallery() {
           <br />
           요양보호사 손에 <span className="text-tv-cue [text-shadow:0_0_32px_rgba(255,209,102,0.45)]">리모컨</span>을
         </h1>
-        <p className="mx-auto mt-5 max-w-md text-[16px] leading-relaxed text-white/60">스마트 TV로 송출하고 태블릿 한 대로 재생과 단계, 긴급 정지를 제어합니다. 아래 화면을 눌러 바로 열어보세요</p>
+        <p className="mx-auto mt-5 max-w-md text-[16px] leading-relaxed text-white/60">스마트 TV로 송출하고 태블릿 한 대로 재생과 단계, 긴급 정지를 제어합니다. 아래 화면을 눌러 바로 열어보세요</p>
         <Link to="/login" className="press mt-8 inline-flex h-14 items-center gap-2 rounded-full bg-white px-8 text-[17px] font-semibold text-[#101312] hover:bg-[#E8ECE9]">
           기관 로그인 <ArrowRight className="h-4 w-4" />
         </Link>
@@ -139,7 +139,7 @@ export default function Gallery() {
       <section className="border-t border-white/[0.08]">
         <div className="mx-auto max-w-3xl px-6 py-24 text-center">
           <h2 className="text-[clamp(28px,3.6vw,44px)] font-extrabold leading-[1.15] tracking-[-0.02em]">오늘의 운동, 지금 시작하세요</h2>
-          <p className="mx-auto mt-4 max-w-md text-[16px] leading-relaxed text-white/60">기관 계정으로 로그인하면 대시보드에서 TV와 태블릿을 바로 열 수 있습니다</p>
+          <p className="mx-auto mt-4 max-w-md text-[16px] leading-relaxed text-white/60">기관 계정으로 로그인하면 대시보드에서 TV와 태블릿을 바로 열 수 있습니다</p>
           <Link to="/login" className="press mt-8 inline-flex h-14 items-center gap-2 rounded-full bg-white px-8 text-[17px] font-semibold text-[#101312] hover:bg-[#E8ECE9]">
             기관 로그인 / 등록 <ArrowRight className="h-4 w-4" />
           </Link>
@@ -171,7 +171,7 @@ function TvLive() {
       <img src={asset('/videos/posters/sit-to-stand.jpg')} alt="" className="absolute inset-0 h-full w-full object-cover" />
       <p className="tnum absolute left-1/2 top-2 flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full bg-black/60 px-2.5 py-1 text-[10px] text-white/85">
         <span className="h-1.5 w-1.5 rounded-full bg-[#F06A6A]" />
-        <span className="font-medium text-white">2단계 · 본운동</span> 동작 4 / 4 · 03:54
+        <span className="font-medium text-white">2단계 · 본운동</span> 동작 4 / 4 · 03:54
       </p>
     </div>
   )
@@ -440,7 +440,7 @@ function AuthMini() {
           <br />
           하루가 움직입니다
         </p>
-        <p className="mt-2 text-[11px] text-white/55">계정은 이 기기에만 저장됩니다</p>
+        <p className="mt-2 text-[11px] text-white/55">계정은 이 기기에만 저장됩니다</p>
       </div>
       <div className="flex flex-col justify-center bg-sand-50 p-4">
         <div className="grid grid-cols-2 rounded-lg bg-sand-100 p-1 text-center text-[11px] font-medium">

@@ -77,7 +77,7 @@ export function SectionHead({ title, count, aside, className }: { title: string;
     <div className={cx('flex items-center justify-between gap-4 border-b border-d-line pb-2.5', className)}>
       <h2 className="flex items-baseline gap-2 text-[15px] font-semibold text-d-1">
         {title}
-        {count !== undefined ? <span className="tnum text-[13px] font-normal text-d-3">{count}</span> : null}
+        {count !== undefined ? <span className="tnum shrink-0 whitespace-nowrap text-[13px] font-normal text-d-3">{count}</span> : null}
       </h2>
       {aside ? <div className="shrink-0 text-[13px] text-d-3">{aside}</div> : null}
     </div>

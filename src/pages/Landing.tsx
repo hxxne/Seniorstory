@@ -15,7 +15,7 @@ const IMG_D = asset('/landing/tablet.webp')
 
 const VISION = [['어르신은', 'TV를', '보고'], ['요양보호사는'], ['태블릿으로', '진행합니다']]
 const ACCT =
-  '출석을 체크한 어르신이 그대로 태블릿의 상태 카드가 되고, 태블릿의 조작이 그대로 TV 화면이 됩니다 — 요양보호사는 기록이 아니라 어르신에게 집중할 수 있습니다.'
+  '출석을 체크한 어르신이 그대로 태블릿의 상태 카드가 되고, 태블릿의 조작이 그대로 TV 화면이 됩니다 — 요양보호사는 기록이 아니라 어르신에게 집중할 수 있습니다.'
 
 const HOTS = [
   { left: '82%', top: '15%', label: '스마트 TV', value: '2단계 · 본운동' },
@@ -48,7 +48,7 @@ const CARDS = [
     size: 'cover',
     label: '[TV와 태블릿]',
     title: ['어르신은 TV를 보고,', '요양보호사는 태블릿으로'],
-    body: '재생과 단계 이동, 어르신별 상태, 긴급 일시정지가 두 화면에 실시간으로 동기화됩니다.',
+    body: '재생과 단계 이동, 어르신별 상태, 긴급 일시정지가 두 화면에 실시간으로 동기화됩니다.',
     to: '/tablet',
   },
   {
@@ -57,7 +57,7 @@ const CARDS = [
     size: 'auto 135%',
     label: '[통합 프로그램 50분]',
     title: ['다리 운동을 더 길게,', '걷는 힘까지'],
-    body: '30분 구성에 다리 운동 두 가지를 더하고, 세트마다 쉬운 동작을 함께 안내합니다.',
+    body: '30분 구성에 다리 운동 두 가지를 더하고, 세트마다 쉬운 동작을 함께 안내합니다.',
     to: '/dashboard/programs',
   },
 ]
@@ -360,14 +360,14 @@ export default function Landing() {
               <span className="cross" />
               <span className="chip">실시간 세션</span>
               <div className="data">
-                <pre>{'장소  1층 다목적실\n단계  2 / 3 · 본운동\n시간  통합 프로그램 30분'}</pre>
+                <pre>{'장소  1층 다목적실\n단계  2 / 3 · 본운동\n시간  통합 프로그램 30분'}</pre>
                 <span className="frame" />
               </div>
             </div>
             <p className="cap">
               스마트 TV로 송출하고
               <br />
-              태블릿 한 대로 제어하는
+              태블릿 한 대로 제어하는
               <br />
               요양기관 운동 프로그램
             </p>
@@ -394,7 +394,7 @@ export default function Landing() {
               <p>
                 재생과 단계 이동, 긴급 정지까지
                 <br />
-                태블릿 한 대로 이어집니다
+                태블릿 한 대로 이어집니다
               </p>
             </div>
           </div>
@@ -421,12 +421,12 @@ export default function Landing() {
           <div className="layer l4" style={{ visibility: 'hidden' }}>
             <h2 className="cred">
               <span className="tag">✕ {p30.name}</span>
-              요양보호사 한 명이 안전하게 진행하는 3단계 운동
+              <span className="nb">요양보호사 한 명이</span> <span className="nb">안전하게 진행하는</span> <span className="nb">3단계 운동</span>
             </h2>
 
             <div className="ccard">
               <h4>
-                한 세션의
+                한 세션의
                 <br />
                 운동 시간
               </h4>
@@ -471,7 +471,7 @@ export default function Landing() {
             <span className="chip">프로그램</span>
             <h2>질환을 고려한 통합 운동 프로그램</h2>
           </div>
-          <p>동작마다 3세트와 쉬는 시간, 어려우신 분을 위한 쉬운 동작까지. 치매·파킨슨·뇌졸중 재활 어르신이 한 공간에서 함께 참여할 수 있도록 설계했습니다.</p>
+          <p>동작마다 3세트와 쉬는 시간, 어려우신 분을 위한 쉬운 동작까지. 치매·파킨슨·뇌졸중 재활 어르신이 한 공간에서 함께 참여할 수 있도록 설계했습니다.</p>
         </div>
 
         <div className="cards">

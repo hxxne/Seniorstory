@@ -74,7 +74,7 @@ export default function Home() {
 
   return (
     <>
-      {/* 표지: 운동실 사진 한 장 */}
+      {/* 표지: 운동실 사진 한 장 */}
       <div className="h-36 overflow-hidden bg-d-side sm:h-44 lg:h-[200px]">
         <img src={asset('/landing/room.webp')} alt="" className="h-full w-full object-cover" style={{ objectPosition: '50% 44%' }} />
       </div>

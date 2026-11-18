@@ -19,6 +19,20 @@
     overflow-x: clip;
     word-break: keep-all;
     overflow-wrap: anywhere;
+    /* 마지막 줄에 한두 낱말만 남지 않게 합니다 */
+    text-wrap: pretty;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    /* 제목은 줄 길이를 고르게 나눕니다 */
+    text-wrap: balance;
+  }
+  /* 한 덩어리로 읽혀야 하는 말: 이 안에서는 줄을 바꾸지 않습니다 */
+  .nb {
+    display: inline-block;
+    white-space: nowrap;
   }
   ::selection {
     @apply bg-moss-200 text-ink;

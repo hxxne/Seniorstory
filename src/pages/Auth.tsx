@@ -61,7 +61,7 @@ export default function Auth({ mode }: { mode: Mode }) {
       setLoginError({ field: 'password', text: '비밀번호가 맞지 않습니다' })
       passwordInput.current?.focus()
       passwordInput.current?.select()
-    } else setLoginError({ field: 'form', text: '이 브라우저에서는 로그인할 수 없습니다. 주소가 https로 시작하는지 확인해 주세요' })
+    } else setLoginError({ field: 'form', text: '이 브라우저에서는 로그인할 수 없습니다. 주소가 https로 시작하는지 확인해 주세요' })
   }
 
   /* ---------- 등록 (3단계) ---------- */
@@ -117,7 +117,7 @@ export default function Auth({ mode }: { mode: Mode }) {
     )
     if (result === 'ok') return navigate('/dashboard')
     setBusy(false)
-    if (result === 'unsupported') return setErrs({ form: '이 브라우저에서는 등록할 수 없습니다. 주소가 https로 시작하는지 확인해 주세요' })
+    if (result === 'unsupported') return setErrs({ form: '이 브라우저에서는 등록할 수 없습니다. 주소가 https로 시작하는지 확인해 주세요' })
     // 그 사이 같은 이메일이 등록됐거나 입력이 바뀐 경우: 계정 단계로 돌아가 알려 줍니다
     go(1)
     setErrs(result === 'email-taken' ? { email: '이미 등록된 이메일입니다. 기관 로그인에서 들어가 주세요' } : result === 'bad-email' ? { email: emailProblem(draft.email) ?? '' } : { password: passwordProblem(draft.password) ?? '' })
@@ -168,7 +168,7 @@ export default function Auth({ mode }: { mode: Mode }) {
                     <h1 className="font-serif text-[28px] font-medium leading-tight tracking-[-0.02em]">기관 로그인</h1>
                     <p className="mt-2 text-[15px] text-ink-3">관리자 계정으로 대시보드에 접속합니다</p>
 
-                    {/* 최근 접속 기관: 한 번에 계속하기 */}
+                    {/* 최근 접속 기관: 한 번에 계속하기 */}
                     {recent ? (
                       <button
                         type="button"
@@ -220,7 +220,7 @@ export default function Auth({ mode }: { mode: Mode }) {
                       <div className="flex items-center justify-between gap-3 text-[14px]">
                         <label className="inline-flex cursor-pointer items-center gap-2 text-ink-2">
                           <input type="checkbox" checked={login.keep} onChange={(e) => setLogin((l) => ({ ...l, keep: e.target.checked }))} className="h-4 w-4 rounded border-ink/20 accent-ink" />
-                          이 기기 기억하기
+                          이 기기 기억하기
                         </label>
                         <Link to="/register" className="font-medium text-ink-2 underline decoration-ink/25 underline-offset-4 hover:decoration-ink">
                           처음이면 기관 등록
@@ -276,7 +276,7 @@ export default function Auth({ mode }: { mode: Mode }) {
                               <Field icon={Users} label="등록 어르신 수" optional type="number" min={1} max={500} inputMode="numeric" placeholder="14" value={draft.capacity} onChange={field('capacity')} />
                             </StepBody>
                           ) : step === 1 ? (
-                            <StepBody title="관리자 계정을 만듭니다" hint="이 계정으로 출석과 세션 기록을 관리합니다">
+                            <StepBody title="관리자 계정을 만듭니다" hint="이 계정으로 출석과 세션 기록을 관리합니다">
                               <Field icon={User} label="관리자 성함" placeholder="홍길동" autoComplete="name" maxLength={20} value={draft.manager} error={errs.manager} onChange={(e) => (field('manager')(e), clear('manager'))} />
                               <Field icon={Mail} label="이메일" type="email" placeholder="admin@institution.kr" autoComplete="email" value={draft.email} error={errs.email} onChange={(e) => (field('email')(e), clear('email'))} />
                               <PasswordField
@@ -286,12 +286,12 @@ export default function Auth({ mode }: { mode: Mode }) {
                                 value={draft.password}
                                 error={errs.password}
                                 onChange={(e) => (field('password')(e), clear('password'))}
-                                hint={!draft.password ? '영문과 숫자를 함께 넣어 8자 이상' : (passwordProblem(draft.password) ?? '쓸 수 있는 비밀번호입니다')}
+                                hint={!draft.password ? '영문과 숫자를 함께 넣어 8자 이상' : (passwordProblem(draft.password) ?? '쓸 수 있는 비밀번호입니다')}
                                 ok={!!draft.password && !passwordProblem(draft.password)}
                               />
                               <PasswordField
                                 label="비밀번호 확인"
-                                placeholder="한 번 더 입력"
+                                placeholder="한 번 더 입력"
                                 autoComplete="new-password"
                                 value={draft.confirm}
                                 error={errs.confirm}
@@ -301,7 +301,7 @@ export default function Auth({ mode }: { mode: Mode }) {
                               />
                             </StepBody>
                           ) : (
-                            <StepBody title="운동은 어떻게 진행하나요" hint="나중에 대시보드에서 언제든 바꿀 수 있습니다">
+                            <StepBody title="운동은 어떻게 진행하나요" hint="나중에 대시보드에서 언제든 바꿀 수 있습니다">
                               <Choice label="기본 프로그램">
                                 <div className="grid w-full grid-cols-2 gap-2">
                                   {programs.map((p) => {
@@ -384,7 +384,7 @@ export default function Auth({ mode }: { mode: Mode }) {
             </div>
           </div>
 
-          <p className="mt-5 text-center text-[13px] leading-relaxed text-ink-3">계정은 이 브라우저에만 저장되고 서버로 보내지 않습니다. 다른 기기나 다른 브라우저에서는 다시 등록해야 합니다.</p>
+          <p className="mt-5 text-center text-[13px] leading-relaxed text-ink-3">계정은 이 브라우저에만 저장되고 서버로 보내지 않습니다. 다른 기기나 다른 브라우저에서는 다시 등록해야 합니다.</p>
           <p className="mt-2 text-center text-[13px] text-ink-3">
             <Link to="/privacy" className="font-semibold text-ink-2 underline-offset-4 hover:underline">
               개인정보 처리방침
@@ -451,7 +451,7 @@ function BrandPanel({ mode, draft, step }: { mode: Mode; draft: Draft; step: num
               )}
             </h2>
             <p className="mt-4 text-[16px] leading-relaxed text-white/75">
-              {mode === 'login' ? '출석 확인부터 운동 진행, TV와 태블릿 조작까지 한 화면에서 이어집니다' : '입력하는 내용이 아래 기관 프로필에 그대로 채워집니다. 세 단계면 충분합니다'}
+              {mode === 'login' ? '출석 확인부터 운동 진행, TV와 태블릿 조작까지 한 화면에서 이어집니다' : '입력하는 내용이 아래 기관 프로필에 그대로 채워집니다. 세 단계면 충분합니다'}
             </p>
 
             {/* Double-Bezel 라이브 스펙 카드 */}
@@ -515,7 +515,7 @@ function BrandPanel({ mode, draft, step }: { mode: Mode; draft: Draft; step: num
             </div>
 
             <p className="mt-5 text-[13px] leading-relaxed text-white/55">
-              계정은 이 기기에만 저장됩니다
+              계정은 이 기기에만 저장됩니다
               <br />
               {specialties.join(' · ')}
             </p>

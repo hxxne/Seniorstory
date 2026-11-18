@@ -36,12 +36,12 @@ export default function Account() {
     const result = await deleteAccount(institution.email, password)
     if (result === 'ok') return navigate('/', { replace: true })
     setBusy(false)
-    setError(result === 'wrong-password' ? '비밀번호가 맞지 않습니다' : '이 브라우저에서는 처리할 수 없습니다')
+    setError(result === 'wrong-password' ? '비밀번호가 맞지 않습니다' : '이 브라우저에서는 처리할 수 없습니다')
   }
 
   return (
     <Page>
-      <PageHead title="계정" description="이 기기에 저장된 기관 정보입니다" />
+      <PageHead title="계정" description="이 기기에 저장된 기관 정보입니다" />
 
       <div className="max-w-[640px]">
         <SectionHead title="저장된 정보" />
@@ -56,7 +56,7 @@ export default function Account() {
             ))}
         </dl>
         <p className="mt-3 text-[13px] leading-relaxed text-d-2">
-          이 정보는 지금 쓰는 브라우저에만 저장되어 있고 서버로 보내지 않습니다. 자세한 내용은{' '}
+          이 정보는 지금 쓰는 브라우저에만 저장되어 있고 서버로 보내지 않습니다. 자세한 내용은{' '}
           <Link to="/privacy" className="font-medium text-d-a underline-offset-4 hover:underline">
             개인정보 처리방침
           </Link>
@@ -68,7 +68,7 @@ export default function Account() {
         </p>
 
         <SectionHead title="계정 삭제" className="mt-12" />
-        <p className="mt-2 leading-relaxed text-d-2">이 기기에 저장된 계정, 출석, 운동 기록, TV 연결이 모두 지워집니다. 지운 뒤에는 되돌릴 수 없습니다.</p>
+        <p className="mt-2 leading-relaxed text-d-2">이 기기에 저장된 계정, 출석, 운동 기록, TV 연결이 모두 지워집니다. 지운 뒤에는 되돌릴 수 없습니다.</p>
 
         {open ? (
           <form onSubmit={submit} noValidate className="mt-4 rounded-lg border border-d-line2 p-4">

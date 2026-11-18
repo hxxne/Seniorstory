@@ -43,7 +43,7 @@ export default function Programs() {
 
   return (
     <Page>
-      <PageHead title="운동 프로그램" description="통합 프로그램 두 가지 중에서 골라 시작합니다" actions={<Seg id="program-tab" label="프로그램 선택" value={id} options={tabs} onChange={setId} />} />
+      <PageHead title="운동 프로그램" description="통합 프로그램 두 가지 중에서 골라 시작합니다" actions={<Seg id="program-tab" label="프로그램 선택" value={id} options={tabs} onChange={setId} />} />
 
       {/* 개요 */}
       <section className="grid gap-x-12 gap-y-8 border-t border-d-line pt-8 lg:grid-cols-[minmax(0,1fr)_400px]">
@@ -65,7 +65,7 @@ export default function Programs() {
 
           <div className="mt-6 flex flex-wrap gap-2">
             <Btn variant="primary" size="lg" disabled={live} onClick={start}>
-              <Play className="h-4 w-4 fill-current" /> {live ? '세션 진행 중' : '이 프로그램으로 시작'}
+              <Play className="h-4 w-4 fill-current" /> {live ? '세션 진행 중' : '이 프로그램으로 시작'}
             </Btn>
             <Btn size="lg" onClick={openTv}>
               <Tv className="h-4 w-4 text-d-3" /> TV 미리보기
@@ -132,7 +132,7 @@ export default function Programs() {
             if (!d) return null
             return (
               <li key={mv.name} className="grid gap-x-8 gap-y-4 border-b border-d-line py-5 sm:grid-cols-[200px_minmax(0,1fr)] xl:grid-cols-[200px_232px_minmax(0,1fr)]">
-                <img src={asset(d.poster)} alt={`${mv.name} 영상의 한 장면`} loading="lazy" className="aspect-video w-full rounded-lg bg-d-side object-cover" />
+                <img src={asset(d.poster)} alt={`${mv.name} 영상의 한 장면`} loading="lazy" className="aspect-video w-full rounded-lg bg-d-side object-cover" />
                 <div className="min-w-0">
                   <p className="text-[12px] text-d-3">
                     {stage.order}단계 · {stage.title}
