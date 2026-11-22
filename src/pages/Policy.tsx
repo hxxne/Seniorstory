@@ -121,7 +121,7 @@ function Privacy() {
             ['GitHub Pages', 'GitHub, Inc. (미국)', '사이트 파일을 보내 줍니다'],
             ['Firebase Realtime Database', 'Google LLC (서버 위치: 싱가포르)', 'TV와 태블릿을 연결했을 때 운동 진행 상태를 전달합니다'],
             ['jsDelivr', 'jsDelivr (Prospect One)', '글꼴(Pretendard) 파일을 보내 줍니다'],
-            ['Google Fonts', 'Google LLC (미국)', '글꼴(Hahmlet) 파일을 보내 줍니다'],
+            ['Google Fonts', 'Google LLC (미국)', '글꼴(Hahmlet, Nunito) 파일을 보내 줍니다'],
           ]}
         />
         <p>이 밖에 개인정보를 다른 곳에 제공하거나 판매하지 않습니다.</p>
@@ -214,7 +214,7 @@ function Terms() {
       </Section>
 
       <Section title="8. 저작권">
-        <p>운동 영상, 프로그램 구성, 화면 디자인의 권리는 운영자에게 있습니다. 소개 화면의 사진은 AI로 만든 이미지입니다. 글꼴은 Pretendard와 Hahmlet(모두 SIL Open Font License), 아이콘은 Lucide(ISC License)를 씁니다.</p>
+        <p>운동 영상, 프로그램 구성, 화면 디자인의 권리는 운영자에게 있습니다. 소개 화면의 사진은 AI로 만든 이미지입니다. 글꼴은 Pretendard, Hahmlet, Nunito(모두 SIL Open Font License), 아이콘은 Lucide(ISC License)를 씁니다.</p>
       </Section>
 
       <Section title="9. 문의">

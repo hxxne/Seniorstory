@@ -13,20 +13,24 @@ export const BRAND = 'MediMove'
 const RED = '#9E161C'
 const GOLD = '#C39D5E'
 
-/** MediMove 기호: 붉은 M 위에 금색 체크. 어두운 배경에서는 M만 흰색으로 바꿉니다 */
+/**
+ * MediMove 기호: 넓은 붉은 M 안에 금색 체크가 오른쪽 위로 뻗습니다. 어두운 배경에서는 M만 흰색으로 바꿉니다.
+ * 가로가 세로의 1.34배입니다. 같은 도형이 logo/_src/logo.html과 overlay-templates/_src/template.html에도 있습니다.
+ */
 export function LogoMark({ size = 28, inverse = false, className = '' }: { size?: number; inverse?: boolean; className?: string }) {
+  const m = inverse ? '#FFFFFF' : RED
   return (
-    <svg viewBox="5 2.5 50 50" width={size} height={size} className={`shrink-0 ${className}`} aria-hidden>
-      <path d="M5,45 V5 H18 L30,22 L42,5 H55 V45 H43 V22 L30,40 L17,22 V45 Z" fill={inverse ? '#FFFFFF' : RED} />
-      <path d="M30,40 L45,15 L55,25 L30,50 Z" fill={GOLD} />
+    <svg viewBox="-1 -1 136.4 102" height={size} width={Math.round(size * 1.337)} className={`shrink-0 ${className}`} aria-hidden>
+      <path d="M0,0 H30 L67.2,38.7 L104.4,0 H134.4 V100 H102.4 V48.2 L67.2,83.4 L32,48.2 V100 H0 Z" fill={m} stroke={m} strokeWidth="2" strokeLinejoin="round" />
+      <path d="M104.4,12.4 H122.1 V28.5 L67.2,83.4 L48.9,65.1 Z" fill={GOLD} stroke={GOLD} strokeWidth="2" strokeLinejoin="round" />
     </svg>
   )
 }
 
-/** 글자 표지: Medi는 붉은색(어두운 배경에서는 흰색), Move는 금색 */
+/** 글자 표지: 둥근 글꼴(Nunito ExtraBold). Medi는 붉은색(어두운 배경에서는 흰색), Move는 금색 */
 export function Wordmark({ inverse = false, className = '' }: { inverse?: boolean; className?: string }) {
   return (
-    <span className={`font-dash font-bold tracking-[-0.03em] ${className}`}>
+    <span className={`font-extrabold tracking-[-0.01em] ${className}`} style={{ fontFamily: 'Nunito, "Pretendard Variable", Pretendard, sans-serif' }}>
       <span style={{ color: inverse ? '#FFFFFF' : RED }}>Medi</span>
       <span style={{ color: GOLD }}>Move</span>
     </span>

@@ -43,7 +43,7 @@ web
 
 ## Brand Commitments
 
-- 제품명 **MediMove**(2026-11-10에 시니어스토리에서 바꿈). 붉은 M(#9E161C) 위에 금색 체크(#C39D5E)가 놓인 기호와, Medi는 붉은색·Move는 금색인 글자 표지. 어두운 배경에서는 붉은색만 흰색으로 바꾼다(`src/components/Logo.tsx`).
+- 제품명 **MediMove**(2026-11-10에 시니어스토리에서 바꿈). 붉은 M(#9E161C) 위에 금색 체크(#C39D5E)가 놓인 기호와, Medi는 붉은색·Move는 금색인 글자 표지. 어두운 배경에서는 붉은색만 흰색으로 바꾼다(`src/components/Logo.tsx`). 기호는 2026-11-22에 사용자가 준 브랜드 시안대로 다시 그렸다: 가로로 넓은 M(가로:세로 1.34) 안에서 체크가 오른쪽 위로 뻗고, 글자는 둥근 Nunito ExtraBold. 로고 파일은 `logo/`에 컬러·검정·빨강·흰색으로 있고 `python logo/_src/build.py`로 다시 만든다. 한 가지 색 버전은 체크 둘레를 가늘게 비워 M과 구분한다.
 - 사이트 주소는 https://medimove.co.kr 이다(2026-11-15에 연결. 도메인클럽에서 구입, GitHub Pages 사용자 지정 도메인). 옛 주소 hxxne.github.io/Seniorstory/는 새 주소로 넘어간다.
 - 저장소 이름과 localStorage 키(`seniorstory:v1`)는 옛 이름 그대로다.
 - TV 하단의 노랑·검정 고대비 큐잉 자막은 제품의 고유 요소다.
