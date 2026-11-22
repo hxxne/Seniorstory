@@ -659,6 +659,12 @@ export const programs: Program[] = [
   },
 ]
 
+/**
+ * 이름과 길이만 정해지고 영상은 아직 없는 프로그램. 목록에 "준비 중"으로만 보이고 시작할 수 없습니다.
+ * 영상이 오면 programs로 옮기고 여기서 지웁니다.
+ */
+export const upcomingPrograms = [{ id: 'c30', name: '인지 향상 훈련 30분', minutes: 30, kind: '인지 향상 훈련' }] as const
+
 export const getProgram = (id: string | null | undefined) => programs.find((p) => p.id === id) ?? null
 
 export const stageDuration = (stage: Stage) => stage.moves.reduce((acc, mv) => acc + mv.durationSec, 0)

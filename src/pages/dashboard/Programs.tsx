@@ -2,13 +2,13 @@ import { useState } from 'react'
 import { Clock, Layers, ListChecks, Play, TriangleAlert, Tv, UserRound } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Btn, Label, Page, PageHead, SectionHead, Seg } from '../../components/dash'
-import { programs, stageDuration } from '../../data/programs'
+import { programs, stageDuration, upcomingPrograms } from '../../data/programs'
 import { asset } from '../../lib/asset'
 import { openTablet, openTv } from '../../lib/launch'
 import { startProgram, useStore } from '../../lib/store'
 import { fmtClock } from '../../lib/useStageClock'
 
-const tabs = programs.map((p) => [p.id, p.name] as const)
+const tabs = [...programs.map((p) => [p.id, p.name] as const), ...upcomingPrograms.map((p) => [p.id, p.name, '준비 중'] as const)]
 // 단계가 뒤로 갈수록 한 단계씩 짙어지는 파랑: 색이 아니라 순서를 보여 줍니다
 const steps = ['#C9D8FB', '#93B0F5', '#2F5FE3']
 const covers: Record<string, { src: string; pos: string }> = {
@@ -18,7 +18,8 @@ const covers: Record<string, { src: string; pos: string }> = {
 
 export default function Programs() {
   const navigate = useNavigate()
-  const [id, setId] = useState(programs[0].id)
+  const [id, setId] = useState<string>(programs[0].id)
+  const upcoming = upcomingPrograms.find((p) => p.id === id)
   const program = programs.find((p) => p.id === id) ?? programs[0]
   const session = useStore((s) => s.session)
   const live = session.status === 'playing' || session.status === 'paused' || session.status === 'emergency'
@@ -41,9 +42,35 @@ export default function Programs() {
     { icon: ListChecks, k: '안전 가이드', v: `${program.safetyGuide.length}개 항목` },
   ]
 
+  const head = <PageHead title="운동 프로그램" description="프로그램을 골라 시작합니다" actions={<Seg id="program-tab" label="프로그램 선택" value={id} options={tabs} onChange={setId} />} />
+
+  // 영상이 아직 없는 프로그램: 이름만 보여 주고 시작 버튼은 두지 않습니다
+  if (upcoming)
+    return (
+      <Page>
+        {head}
+        <section className="border-t border-d-line pt-8">
+          <p className="text-[13px] font-medium text-d-a">{upcoming.kind}</p>
+          <h2 className="mt-2 flex flex-wrap items-center gap-3 text-[28px] font-semibold leading-tight tracking-[-0.025em]">
+            {upcoming.name}
+            <Label tone="warn">준비 중</Label>
+          </h2>
+          <p className="mt-4 max-w-[62ch] text-[15px] leading-[1.7] text-d-2">영상을 준비하고 있습니다. 준비가 끝나면 이 자리에서 단계와 동작을 확인하고 바로 시작할 수 있습니다.</p>
+          <dl className="mt-6 max-w-md">
+            <div className="grid h-9 grid-cols-[132px_1fr] items-center text-[13.5px]">
+              <dt className="inline-flex items-center gap-2 text-d-3">
+                <Clock className="h-4 w-4" /> 소요 시간
+              </dt>
+              <dd className="tnum">{upcoming.minutes}분</dd>
+            </div>
+          </dl>
+        </section>
+      </Page>
+    )
+
   return (
     <Page>
-      <PageHead title="운동 프로그램" description="통합 프로그램 두 가지 중에서 골라 시작합니다" actions={<Seg id="program-tab" label="프로그램 선택" value={id} options={tabs} onChange={setId} />} />
+      {head}
 
       {/* 개요 */}
       <section className="grid gap-x-12 gap-y-8 border-t border-d-line pt-8 lg:grid-cols-[minmax(0,1fr)_400px]">

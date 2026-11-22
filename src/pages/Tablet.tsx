@@ -4,7 +4,7 @@ import Logo from '../components/Logo'
 import { Avatar, Btn, Dot, StatusIcon, cx, statusLabel, statusTone, type StatusKind } from '../components/dash'
 import TvLink from '../components/TvLink'
 import { CueBar } from '../components/ui/Primitives'
-import { phaseAt, programs, stageDuration } from '../data/programs'
+import { phaseAt, programs, stageDuration, upcomingPrograms } from '../data/programs'
 import { seniors } from '../data/seniors'
 import { openTv } from '../lib/launch'
 import { cycleSeniorStatus, emergencyStop, endSession, gotoStage, nextMove, play, startProgram, togglePlay, useStore } from '../lib/store'
@@ -91,6 +91,14 @@ export default function Tablet() {
                     <Play className="h-4 w-4 fill-current" /> 재생 시작
                   </span>
                 </button>
+              ))}
+              {upcomingPrograms.map((p) => (
+                <div key={p.id} className="flex flex-col rounded-2xl border border-dashed border-d-line2 p-6 text-left">
+                  <p className="text-[13px] font-medium text-d-2">{p.kind}</p>
+                  <h2 className="mt-1.5 text-[24px] font-semibold tracking-[-0.02em] text-d-2">{p.name}</h2>
+                  <p className="mt-4 text-[14px] leading-relaxed text-d-2">영상을 준비하고 있습니다.</p>
+                  <span className="mt-6 flex h-14 items-center justify-center rounded-xl bg-d-hover text-[16px] font-medium text-d-2">준비 중</span>
+                </div>
               ))}
             </div>
           </motion.main>
