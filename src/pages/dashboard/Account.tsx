@@ -1,7 +1,7 @@
 import { useId, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Btn, Page, PageHead, SectionHead } from '../../components/dash'
-import { deleteAccount } from '../../lib/auth'
+import { deleteAccount, serverAccounts } from '../../lib/auth'
 import { useStore } from '../../lib/store'
 
 /* 계정: 이 기기에 저장된 내 정보를 보고, 지울 수 있는 곳 */
@@ -36,12 +36,12 @@ export default function Account() {
     const result = await deleteAccount(institution.email, password)
     if (result === 'ok') return navigate('/', { replace: true })
     setBusy(false)
-    setError(result === 'wrong-password' ? '비밀번호가 맞지 않습니다' : '이 브라우저에서는 처리할 수 없습니다')
+    setError(result === 'wrong-password' ? '비밀번호가 맞지 않습니다' : result === 'network' ? '서버에 닿지 못했습니다. 인터넷 연결을 확인하고 다시 해 주세요' : result === 'too-many' ? '여러 번 틀려서 잠시 막혔습니다. 조금 뒤에 다시 해 주세요' : '지금은 처리할 수 없습니다. 잠시 뒤에 다시 해 주세요')
   }
 
   return (
     <Page>
-      <PageHead title="계정" description="이 기기에 저장된 기관 정보입니다" />
+      <PageHead title="계정" description={serverAccounts ? '등록한 기관 정보입니다' : '이 기기에 저장된 기관 정보입니다'} />
 
       <div className="max-w-[640px]">
         <SectionHead title="저장된 정보" />
@@ -56,7 +56,7 @@ export default function Account() {
             ))}
         </dl>
         <p className="mt-3 text-[13px] leading-relaxed text-d-2">
-          이 정보는 지금 쓰는 브라우저에만 저장되어 있고 서버로 보내지 않습니다. 자세한 내용은{' '}
+          {serverAccounts ? '이 정보는 어느 기기에서나 로그인할 수 있도록 서버에 저장되어 있습니다.' : '이 정보는 지금 쓰는 브라우저에만 저장되어 있고 서버로 보내지 않습니다.'} 자세한 내용은{' '}
           <Link to="/privacy" className="font-medium text-d-a underline-offset-4 hover:underline">
             개인정보 처리방침
           </Link>
@@ -68,7 +68,7 @@ export default function Account() {
         </p>
 
         <SectionHead title="계정 삭제" className="mt-12" />
-        <p className="mt-2 leading-relaxed text-d-2">이 기기에 저장된 계정, 출석, 운동 기록, TV 연결이 모두 지워집니다. 지운 뒤에는 되돌릴 수 없습니다.</p>
+        <p className="mt-2 leading-relaxed text-d-2">{serverAccounts ? '서버의 계정과 기관 정보, 이 기기에 저장된 출석, 운동 기록, TV 연결이 모두 지워집니다.' : '이 기기에 저장된 계정, 출석, 운동 기록, TV 연결이 모두 지워집니다.'} 지운 뒤에는 되돌릴 수 없습니다.</p>
 
         {open ? (
           <form onSubmit={submit} noValidate className="mt-4 rounded-lg border border-d-line2 p-4">

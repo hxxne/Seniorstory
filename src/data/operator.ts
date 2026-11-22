@@ -20,6 +20,6 @@ export const operator = {
 }
 
 /** 처리방침과 약관을 마지막으로 고친 날 */
-export const POLICY_DATE = '2026년 11월 18일'
+export const POLICY_DATE = '2026년 11월 22일'
 
 export const operatorReady = operator.name !== '' && operator.email !== ''

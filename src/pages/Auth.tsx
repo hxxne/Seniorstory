@@ -9,7 +9,7 @@ import { programs } from '../data/programs'
 import { nextExercise } from '../data/schedule'
 import { seniors, specialties } from '../data/seniors'
 import { appUrl, asset } from '../lib/asset'
-import { emailProblem, hasAccount, passwordProblem, signIn, signUp } from '../lib/auth'
+import { emailProblem, hasAccount, passwordProblem, resetPassword, serverAccounts, signIn, signUp } from '../lib/auth'
 import { useStore } from '../lib/store'
 
 type Mode = 'login' | 'signup'
@@ -38,13 +38,24 @@ export default function Auth({ mode }: { mode: Mode }) {
   const signedIn = useStore((s) => s.institution !== null)
   const last = useStore((s) => s.lastInstitution)
   // 계정이 남아 있는 최근 접속 기관만 보여 줍니다
-  const recent = last && hasAccount(last.email) ? last : null
+  const recent = last && (serverAccounts || hasAccount(last.email)) ? last : null
 
   /* ---------- 로그인 ---------- */
   const [login, setLogin] = useState({ email: recent?.email ?? '', password: '', keep: true })
   const [loginError, setLoginError] = useState<{ field: 'email' | 'password' | 'form'; text: string } | null>(null)
   const [busy, setBusy] = useState(false)
   const passwordInput = useRef<HTMLInputElement>(null)
+  const [resetNote, setResetNote] = useState('')
+
+  const sendReset = async () => {
+    const bad = emailProblem(login.email)
+    setResetNote('')
+    if (bad) return setLoginError({ field: 'email', text: '비밀번호를 다시 정할 계정의 이메일을 먼저 입력해 주세요' })
+    setLoginError(null)
+    const result = await resetPassword(login.email)
+    if (result === 'ok') setResetNote(`${login.email.trim()} 주소로 비밀번호를 다시 정하는 메일을 보냈습니다. 받은편지함과 스팸함을 확인해 주세요`)
+    else setLoginError({ field: 'form', text: result === 'too-many' ? '요청이 많아 잠시 막혔습니다. 조금 뒤에 다시 해 주세요' : '메일을 보내지 못했습니다. 인터넷 연결을 확인하고 다시 해 주세요' })
+  }
 
   const submitLogin = async (e: FormEvent) => {
     e.preventDefault()
@@ -61,7 +72,14 @@ export default function Auth({ mode }: { mode: Mode }) {
       setLoginError({ field: 'password', text: '비밀번호가 맞지 않습니다' })
       passwordInput.current?.focus()
       passwordInput.current?.select()
-    } else setLoginError({ field: 'form', text: '이 브라우저에서는 로그인할 수 없습니다. 주소가 https로 시작하는지 확인해 주세요' })
+    } else if (result === 'bad-login') {
+      setLoginError({ field: 'password', text: '이메일 또는 비밀번호가 맞지 않습니다' })
+      passwordInput.current?.focus()
+      passwordInput.current?.select()
+    } else if (result === 'too-many') setLoginError({ field: 'form', text: '여러 번 틀려서 잠시 막혔습니다. 조금 뒤에 다시 해 주세요' })
+    else if (result === 'network') setLoginError({ field: 'form', text: '서버에 닿지 못했습니다. 인터넷 연결을 확인하고 다시 해 주세요' })
+    else if (result === 'not-enabled') setLoginError({ field: 'form', text: '로그인 서버 설정이 끝나지 않았습니다. 운영자에게 알려 주세요' })
+    else setLoginError({ field: 'form', text: '이 브라우저에서는 로그인할 수 없습니다. 주소가 https로 시작하는지 확인해 주세요' })
   }
 
   /* ---------- 등록 (3단계) ---------- */
@@ -118,6 +136,9 @@ export default function Auth({ mode }: { mode: Mode }) {
     if (result === 'ok') return navigate('/dashboard')
     setBusy(false)
     if (result === 'unsupported') return setErrs({ form: '이 브라우저에서는 등록할 수 없습니다. 주소가 https로 시작하는지 확인해 주세요' })
+    if (result === 'network') return setErrs({ form: '서버에 닿지 못했습니다. 인터넷 연결을 확인하고 다시 해 주세요' })
+    if (result === 'too-many') return setErrs({ form: '요청이 많아 잠시 막혔습니다. 조금 뒤에 다시 해 주세요' })
+    if (result === 'not-enabled') return setErrs({ form: '로그인 서버 설정이 끝나지 않았습니다. 운영자에게 알려 주세요' })
     // 그 사이 같은 이메일이 등록됐거나 입력이 바뀐 경우: 계정 단계로 돌아가 알려 줍니다
     go(1)
     setErrs(result === 'email-taken' ? { email: '이미 등록된 이메일입니다. 기관 로그인에서 들어가 주세요' } : result === 'bad-email' ? { email: emailProblem(draft.email) ?? '' } : { password: passwordProblem(draft.password) ?? '' })
@@ -226,6 +247,18 @@ export default function Auth({ mode }: { mode: Mode }) {
                           처음이면 기관 등록
                         </Link>
                       </div>
+                      {serverAccounts ? (
+                        <p className="text-[14px]">
+                          <button type="button" onClick={sendReset} className="font-medium text-ink-2 underline decoration-ink/25 underline-offset-4 hover:decoration-ink">
+                            비밀번호를 잊으셨나요
+                          </button>
+                        </p>
+                      ) : null}
+                      {resetNote ? (
+                        <p role="status" className="text-[14px] leading-snug text-ink-2">
+                          {resetNote}
+                        </p>
+                      ) : null}
                       {loginError?.field === 'form' ? (
                         <p role="alert" className="text-[14px] leading-snug text-coral-deep">
                           {loginError.text}
@@ -384,7 +417,9 @@ export default function Auth({ mode }: { mode: Mode }) {
             </div>
           </div>
 
-          <p className="mt-5 text-center text-[13px] leading-relaxed text-ink-3">계정은 이 브라우저에만 저장되고 서버로 보내지 않습니다. 다른 기기나 다른 브라우저에서는 다시 등록해야 합니다.</p>
+          <p className="mt-5 text-center text-[13px] leading-relaxed text-ink-3">
+            {serverAccounts ? '등록한 이메일과 비밀번호로 PC, 태블릿, 핸드폰 어디서나 로그인할 수 있습니다.' : '계정은 이 브라우저에만 저장되고 서버로 보내지 않습니다. 다른 기기나 다른 브라우저에서는 다시 등록해야 합니다.'}
+          </p>
           <p className="mt-2 text-center text-[13px] text-ink-3">
             <Link to="/privacy" className="font-semibold text-ink-2 underline-offset-4 hover:underline">
               개인정보 처리방침
@@ -515,7 +550,7 @@ function BrandPanel({ mode, draft, step }: { mode: Mode; draft: Draft; step: num
             </div>
 
             <p className="mt-5 text-[13px] leading-relaxed text-white/55">
-              계정은 이 기기에만 저장됩니다
+              {serverAccounts ? '어느 기기에서나 같은 계정으로' : '계정은 이 기기에만 저장됩니다'}
               <br />
               {specialties.join(' · ')}
             </p>

@@ -15,7 +15,7 @@ import { applyShared, freshSession, getState, idleSession, onLocalChange, pickSh
 
 /** 실시간 데이터베이스 주소. 비어 있으면 기기 간 연결 기능이 꺼집니다 */
 const DEFAULT_URL = 'https://medimove-9725f-default-rtdb.asia-southeast1.firebasedatabase.app'
-const SYNC_URL = ((import.meta.env.VITE_SYNC_URL as string | undefined) || DEFAULT_URL).replace(/\/+$/, '')
+export const SYNC_URL = ((import.meta.env.VITE_SYNC_URL as string | undefined) || DEFAULT_URL).replace(/\/+$/, '')
 export const syncReady = SYNC_URL !== ''
 
 type Json = null | boolean | number | string | { [k: string]: Json }
