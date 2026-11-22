@@ -1,13 +1,13 @@
 /** 영상에서 읽어 낸 동작 정보. MediMove 완성 영상 8편을 분석해 채웠습니다 */
 export interface MoveDetail {
-  area: '상체' | '하체'
+  area: '상체' | '하체' | '전신'
   focus: string
-  posture: '앉아서' | '서서'
+  posture: '앉아서' | '서서' | '의자에서'
   /** 세트 구성. 예: 3세트 × 10회 */
   dose: string
   /** 한 세트의 양. 예: 10회, 좌우 10회씩, 30초 */
   perSet: string
-  /** 영상 속 지도자 */
+  /** 영상 속 지도자. 모르면 비웁니다 */
   coach: string
   /** 시작 자세 */
   setup: string
@@ -247,6 +247,278 @@ export const exercises = {
 } satisfies Record<string, Move>
 
 const ex = exercises
+
+/* ------------------------------------------------------------------ */
+/* 30분 프로그램의 동작 12개. 한 편짜리 영상(33분 30초, 2026-11-22에 받음)을 */
+/* 동작 사이의 빈 구간에서 잘랐습니다. 이름·구성·안내 문구는 영상 화면에  */
+/* 나오는 글자 그대로이고, 세트 시각은 화면의 세트 표시가 바뀌는 지점입니다. */
+/* ------------------------------------------------------------------ */
+
+export const p30Moves = {
+  ankleCircle: {
+    name: '발목 돌리기',
+    durationSec: 132,
+    cue: '다리를 앞으로 뻗고 발목을 위아래로 까딱까딱 움직여요',
+    detail: {
+      area: '하체',
+      focus: '발목 · 종아리',
+      posture: '앉아서',
+      dose: '좌우 12회씩',
+      perSet: '12회',
+      coach: '',
+      setup: '의자에 앉아 허리를 곧게 폅니다',
+      guides: [
+        { head: '이렇게 하세요', tip: '다리를 앞으로 뻗고 발목을 위아래로 까딱까딱 움직여요' },
+        { head: '주의하세요', tip: '뻗기 힘들면 손으로 다리를 받쳐 주세요' },
+      ],
+      timeline: [{ startAt: 31 }, { startAt: 75 }],
+      cues: ['다리를 앞으로 뻗고 발목을 위아래로 까딱까딱 움직여요', '뻗기 힘들면 손으로 다리를 받쳐 주세요', '허리는 곧게 펴 주세요'],
+      video: '/videos/p30/ankle-circle.mp4',
+      poster: '/videos/p30/posters/ankle-circle.jpg',
+    },
+  },
+  shoulderCircle: {
+    name: '어깨 돌리기',
+    durationSec: 80,
+    cue: '어깨를 귀 쪽으로 올렸다가 뒤로 크게 돌려요',
+    detail: {
+      area: '상체',
+      focus: '어깨 · 등',
+      posture: '앉아서',
+      dose: '2세트 × 10회',
+      perSet: '10회',
+      coach: '',
+      setup: '의자에 앉아 허리를 곧게 폅니다',
+      guides: [
+        { head: '이렇게 하세요', tip: '어깨를 귀 쪽으로 올렸다가 뒤로 크게 돌려요' },
+        { head: '주의하세요', tip: '목은 그대로 두고 어깨만 천천히 돌려요' },
+      ],
+      timeline: [{ startAt: 3 }, { startAt: 37 }],
+      cues: ['어깨를 귀 쪽으로 올렸다가 뒤로 크게 돌려요', '목은 그대로 두고 어깨만 천천히 돌려요'],
+      video: '/videos/p30/shoulder-circle.mp4',
+      poster: '/videos/p30/posters/shoulder-circle.jpg',
+    },
+  },
+  backTwist: {
+    name: '등 돌리기',
+    durationSec: 84,
+    cue: '양팔을 가슴 앞에 엇갈려 모으고 좌우로 번갈아 돌려요',
+    detail: {
+      area: '상체',
+      focus: '등 · 허리',
+      posture: '앉아서',
+      dose: '2세트 × 8회',
+      perSet: '8회',
+      coach: '',
+      setup: '의자에 앉아 양팔을 가슴 앞에 엇갈려 모읍니다',
+      guides: [
+        { head: '이렇게 하세요', tip: '양팔을 가슴 앞에 엇갈려 모으고 좌우로 번갈아 돌려요' },
+        { head: '주의하세요', tip: '엉덩이와 무릎은 앞을 향하게 두세요' },
+      ],
+      timeline: [{ startAt: 4 }, { startAt: 42 }],
+      cues: ['양팔을 가슴 앞에 엇갈려 모으고 좌우로 번갈아 돌려요', '엉덩이와 무릎은 앞을 향하게 두세요'],
+      video: '/videos/p30/back-twist.mp4',
+      poster: '/videos/p30/posters/back-twist.jpg',
+    },
+  },
+  seatedWalk: {
+    name: '제자리 걷기',
+    durationSec: 108,
+    cue: '허리를 곧게 펴고 무릎을 번갈아 들며 팔도 함께 흔들어요',
+    detail: {
+      area: '전신',
+      focus: '다리 · 전신',
+      posture: '앉아서',
+      dose: '2세트 × 30초',
+      perSet: '30초',
+      coach: '',
+      setup: '의자에 앉아 허리를 곧게 폅니다',
+      guides: [
+        { head: '이렇게 하세요', tip: '허리를 곧게 펴고 무릎을 번갈아 들며 팔도 함께 흔들어요' },
+        { head: '주의하세요', tip: '숨을 참지 말고 편하게 쉬세요' },
+      ],
+      timeline: [{ startAt: 3 }, { restAt: 51, startAt: 65 }],
+      cues: ['허리를 곧게 펴고 무릎을 번갈아 들며 팔도 함께 흔들어요', '숨을 참지 말고 편하게 쉬세요', '허리를 곧게 펴고 자연스럽게 걸어 보세요'],
+      video: '/videos/p30/seated-walk.mp4',
+      poster: '/videos/p30/posters/seated-walk.jpg',
+    },
+  },
+  chairStand: {
+    name: '앉았다 일어나기',
+    durationSec: 260,
+    cue: '무릎을 짚고 일어났다가 천천히 앉아요',
+    detail: {
+      area: '하체',
+      focus: '허벅지 · 엉덩이',
+      posture: '의자에서',
+      dose: '2세트 × 10회',
+      perSet: '10회',
+      coach: '',
+      setup: '발바닥 전체가 바닥에 닿게 앉습니다',
+      guides: [
+        { head: '이렇게 하세요', tip: '무릎을 짚고 일어났다가 천천히 앉아요' },
+        { head: '이렇게 하세요', tip: '가슴 앞에 손을 X자로 모으고 일어났다 앉아요' },
+      ],
+      timeline: [{ startAt: 3 }, { restAt: 133, startAt: 153 }],
+      cues: ['무릎을 짚고 일어났다가 천천히 앉아요', '가슴 앞에 손을 X자로 모으고 일어났다 앉아요', '발바닥 전체가 바닥에 닿게 해 주세요', '무릎이나 허리가 아프면 바로 멈추고 쉬세요', '힘들면 무릎을 짚고 일어나도 괜찮아요'],
+      video: '/videos/p30/sit-to-stand.mp4',
+      poster: '/videos/p30/posters/sit-to-stand.jpg',
+    },
+  },
+  kneeStraighten: {
+    name: '무릎 펴기',
+    durationSec: 422,
+    cue: '발을 바닥에서 떼고 무릎을 천천히 펴서 올려요',
+    detail: {
+      area: '하체',
+      focus: '허벅지 앞쪽',
+      posture: '앉아서',
+      dose: '좌우 각 10회 · 6회',
+      perSet: '좌우 각각',
+      coach: '',
+      setup: '의자에 앉아 허리를 곧게 폅니다',
+      guides: [
+        { head: '이렇게 하세요', tip: '발을 바닥에서 떼고 무릎을 천천히 펴서 올려요' },
+        { head: '이렇게 하세요', tip: '발끝을 내 쪽으로 당기고 끝까지 펴서 잠깐 멈춰요' },
+      ],
+      timeline: [{ startAt: 5 }, { restAt: 207, startAt: 225 }],
+      cues: ['발을 바닥에서 떼고 무릎을 천천히 펴서 올려요', '발끝을 내 쪽으로 당기고 끝까지 펴서 잠깐 멈춰요', '허벅지 앞쪽에 힘이 들어가는 걸 느껴 보세요', '무릎이 아프면 아프지 않을 만큼만 펴 주셔도 괜찮아요'],
+      video: '/videos/p30/knee-extension.mp4',
+      poster: '/videos/p30/posters/knee-extension.jpg',
+    },
+  },
+  heelLift: {
+    name: '뒤꿈치 들기',
+    durationSec: 240,
+    cue: '손끝을 의자에 대고 뒤꿈치를 들었다가 천천히 내려요',
+    detail: {
+      area: '하체',
+      focus: '종아리',
+      posture: '서서',
+      dose: '15회 · 10회',
+      perSet: '1세트 15회, 2세트 10회',
+      coach: '',
+      setup: '의자 옆에 서서 손끝을 의자에 댑니다',
+      guides: [
+        { head: '이렇게 하세요', tip: '손끝을 의자에 대고 뒤꿈치를 들었다가 천천히 내려요' },
+        { head: '이렇게 하세요', tip: '손을 떼고 까치발에서 잠깐 멈춰요' },
+      ],
+      timeline: [{ startAt: 4 }, { restAt: 102, startAt: 124 }],
+      cues: ['손끝을 의자에 대고 뒤꿈치를 들었다가 천천히 내려요', '손을 떼고 까치발에서 잠깐 멈춰요', '천천히 내려 주세요', '흔들리면 바로 의자를 잡으세요'],
+      video: '/videos/p30/heel-raise.mp4',
+      poster: '/videos/p30/posters/heel-raise.jpg',
+    },
+  },
+  sideLegRaise: {
+    name: '다리 옆으로 들기',
+    durationSec: 342,
+    cue: '의자를 잡고 다리만 옆으로 들었다 내려요',
+    detail: {
+      area: '하체',
+      focus: '엉덩이 옆',
+      posture: '서서',
+      dose: '좌우 각 10회 · 6회',
+      perSet: '좌우 각각',
+      coach: '',
+      setup: '의자 옆에 서서 의자를 잡습니다',
+      guides: [
+        { head: '이렇게 하세요', tip: '의자를 잡고 다리만 옆으로 들었다 내려요' },
+        { head: '이렇게 하세요', tip: '손끝만 의자에 대고 다리를 든 채 잠깐 멈춰요' },
+      ],
+      timeline: [{ startAt: 5 }, { restAt: 155, startAt: 178 }],
+      cues: ['의자를 잡고 다리만 옆으로 들었다 내려요', '손끝만 의자에 대고 다리를 든 채 잠깐 멈춰요', '몸이 기울지 않게 곧게 서세요', '흔들리면 반드시 의자를 잡고 해 주세요'],
+      video: '/videos/p30/side-leg-raise.mp4',
+      poster: '/videos/p30/posters/side-leg-raise.jpg',
+    },
+  },
+  toePull: {
+    name: '발끝 당기기',
+    durationSec: 100,
+    cue: '다리를 앞으로 뻗고 발끝을 몸 쪽으로 당겨 주세요',
+    detail: {
+      area: '하체',
+      focus: '허벅지 뒤 · 종아리',
+      posture: '앉아서',
+      dose: '좌우 10회씩',
+      perSet: '10회',
+      coach: '',
+      setup: '의자에 앉아 한쪽 다리를 앞으로 뻗습니다',
+      guides: [
+        { head: '이렇게 하세요', tip: '다리를 앞으로 뻗고 발끝을 몸 쪽으로 당겨 주세요' },
+        { head: '주의하세요', tip: '가슴을 펴고 상체는 숙이지 마세요' },
+      ],
+      timeline: [{ startAt: 14 }, { startAt: 50 }],
+      cues: ['다리를 앞으로 뻗고 발끝을 몸 쪽으로 당겨 주세요', '가슴을 펴고 상체는 숙이지 마세요'],
+      video: '/videos/p30/toe-pull.mp4',
+      poster: '/videos/p30/posters/toe-pull.jpg',
+    },
+  },
+  chestStretch: {
+    name: '가슴 펴기',
+    durationSec: 68,
+    cue: '양손을 등 뒤에서 깍지 끼고 가슴을 활짝 열어요',
+    detail: {
+      area: '상체',
+      focus: '가슴 · 어깨',
+      posture: '앉아서',
+      dose: '10회',
+      perSet: '10회',
+      coach: '',
+      setup: '의자에 앉아 양손을 등 뒤로 보냅니다',
+      guides: [
+        { head: '이렇게 하세요', tip: '양손을 등 뒤에서 깍지 끼고 가슴을 활짝 열어요' },
+      ],
+      timeline: [{ startAt: 4 }],
+      cues: ['양손을 등 뒤에서 깍지 끼고 가슴을 활짝 열어요', '어려우면 손을 허리에 대도 괜찮아요'],
+      video: '/videos/p30/chest-stretch.mp4',
+      poster: '/videos/p30/posters/chest-stretch.jpg',
+    },
+  },
+  neckTilt: {
+    name: '목 기울이기',
+    durationSec: 80,
+    cue: '턱을 살짝 당기고 귀를 어깨 쪽으로 내려요',
+    detail: {
+      area: '상체',
+      focus: '목 · 어깨',
+      posture: '앉아서',
+      dose: '좌우 5회씩',
+      perSet: '5회',
+      coach: '',
+      setup: '의자에 앉아 턱을 살짝 당깁니다',
+      guides: [
+        { head: '이렇게 하세요', tip: '턱을 살짝 당기고 귀를 어깨 쪽으로 내려요' },
+        { head: '주의하세요', tip: '어깨를 으쓱대지 않도록 해요' },
+      ],
+      timeline: [{ startAt: 4 }, { startAt: 36 }],
+      cues: ['턱을 살짝 당기고 귀를 어깨 쪽으로 내려요', '어깨를 으쓱대지 않도록 해요'],
+      video: '/videos/p30/neck-tilt.mp4',
+      poster: '/videos/p30/posters/neck-tilt.jpg',
+    },
+  },
+  bellyBreath: {
+    name: '호흡',
+    durationSec: 94,
+    cue: '코로 들이쉬며 배를 부풀리고 입으로 길게 내쉬어요',
+    detail: {
+      area: '전신',
+      focus: '배 호흡',
+      posture: '앉아서',
+      dose: '5회',
+      perSet: '5회',
+      coach: '',
+      setup: '의자에 편하게 앉습니다',
+      guides: [
+        { head: '이렇게 하세요', tip: '코로 들이쉬며 배를 부풀리고 입으로 길게 내쉬어요' },
+      ],
+      timeline: [{ startAt: 4 }],
+      cues: ['코로 들이쉬며 배를 부풀리고 입으로 길게 내쉬어요', '숨을 참지 말고 편안하게 쉬어요'],
+      video: '/videos/p30/breathing.mp4',
+      poster: '/videos/p30/posters/breathing.jpg',
+    },
+  },
+} satisfies Record<string, Move>
+const n = p30Moves
 const restCue = '잠시 쉬어갈게요. 숨을 크게 들이쉬고, 내쉬세요'
 
 /** 동작 안에서 지금이 몇 세트인지, 쉬는 시간인지 */
@@ -286,18 +558,18 @@ export const programs: Program[] = [
     id: 'p30',
     name: '통합 프로그램 30분',
     minutes: 30,
-    tagline: '상체를 풀고 다리 힘을 기르는 기본 운동',
+    tagline: '몸을 풀고 다리 힘을 기르는 기본 운동',
     description:
-      '의자 하나로 진행하는 30분 운동입니다. 준비운동에서 호흡과 어깨 돌리기로 몸을 풀고, 본운동에서 가슴과 등을 편 뒤 까치발 들기와 앉았다 일어서기로 다리 힘을 기릅니다. 제자리 걷기와 호흡으로 마무리합니다. 동작마다 세트가 나뉘고 세트 사이에 쉬는 시간이 있습니다.',
+      '의자 하나로 진행하는 운동입니다. 준비운동에서 발목·어깨·등을 풀고 제자리 걷기로 몸을 데운 뒤, 본운동에서 앉았다 일어나기와 무릎 펴기, 뒤꿈치 들기, 다리 옆으로 들기로 다리 힘을 기릅니다. 마무리운동은 스트레칭과 호흡입니다. 영상 길이는 33분 30초입니다.',
     stages: [
       {
         id: 'p30-1',
         order: 1,
         title: '준비운동',
         subtitle: '몸 풀기',
-        goal: '호흡을 고르고 어깨를 돌려 몸을 데웁니다',
+        goal: '발목·어깨·등을 돌려 풀고 제자리 걷기로 몸을 데웁니다',
         tone: 'moss',
-        moves: [m('복식 호흡', 1.5, '코로 천천히 들이쉬고, 입으로 길게 내쉬세요'), ex.shoulderRoll],
+        moves: [n.ankleCircle, n.shoulderCircle, n.backTwist, n.seatedWalk],
         cues: ['의자 앞쪽에 앉아 주세요', '허리를 곧게 펴 주세요', '불편하면 손을 들어 주세요'],
         caution: '어지러움을 호소하면 즉시 멈추고 앉은 자세를 유지합니다',
       },
@@ -305,30 +577,30 @@ export const programs: Program[] = [
         id: 'p30-2',
         order: 2,
         title: '본운동',
-        subtitle: '상체 펴기와 다리 힘 기르기',
-        goal: '가슴과 등을 편 뒤 종아리와 허벅지 힘을 길러 일어서기와 걷기를 돕습니다',
+        subtitle: '하지 근력',
+        goal: '허벅지·엉덩이·종아리 힘을 길러 일어서기와 걷기를 돕습니다',
         tone: 'coral',
-        moves: [ex.chestOpen, ex.trunkTwist, ex.heelRaise, ex.sitToStand],
-        cues: ['통증이 없는 범위까지만', '숨을 참지 마세요', '허벅지를 짚고 하셔도 돼요', '힘들면 쉬운 동작으로 하세요'],
-        caution: '앉았다 일어서기는 의자를 벽에 붙이고 요양보호사가 옆에서 보조합니다. 휠체어 어르신은 까치발 들기까지만 참여하고, 허리 통증이 있으면 등 돌리기의 범위를 줄입니다',
+        moves: [n.chairStand, n.kneeStraighten, n.heelLift, n.sideLegRaise],
+        cues: ['통증이 없는 범위까지만', '숨을 참지 마세요', '흔들리면 의자를 잡으세요', '힘들면 쉬운 동작으로 하세요'],
+        caution: '앉았다 일어나기는 의자를 벽에 붙이고 요양보호사가 옆에서 보조합니다. 뒤꿈치 들기와 다리 옆으로 들기는 서서 하는 동작이므로 의자를 잡게 하고, 서기 어려운 어르신은 앉아서 무릎 펴기까지만 참여합니다',
       },
       {
         id: 'p30-3',
         order: 3,
         title: '마무리운동',
-        subtitle: '걷고 숨 고르기',
-        goal: '앉아서 걷는 동작으로 리듬을 올린 뒤 호흡으로 가라앉힙니다',
+        subtitle: '스트레칭과 호흡',
+        goal: '다리 뒤쪽과 가슴, 목을 늘리고 배 호흡으로 숨을 고릅니다',
         tone: 'ink',
-        moves: [ex.seatedMarch, m('마무리 호흡', 1, '숨을 크게 들이쉬고, 길게 내쉬어요')],
+        moves: [n.toePull, n.chestStretch, n.neckTilt, n.bellyBreath],
         cues: ['오늘도 수고 많으셨어요', '천천히 숨을 내쉬어요', '물 한 잔 드세요'],
         caution: '운동 후 5분간 어르신의 안색과 호흡을 관찰합니다',
       },
     ],
     effects: [
-      { category: '신체적', text: '어깨·가슴·등이 굳지 않게 유지하고 굽은 자세 완화' },
-      { category: '신체적', text: '종아리·허벅지 근력 강화로 의자에서 일어서기가 수월해짐' },
-      { category: '건강', text: '하체 근력을 유지해 넘어질 위험을 줄이는 것이 목표' },
-      { category: '건강', text: '세트와 쉬는 시간을 나눈 저강도 구성으로 숨이 차지 않게 진행' },
+      { category: '신체적', text: '발목·어깨·등을 풀어 몸이 굳지 않게 유지' },
+      { category: '신체적', text: '허벅지·엉덩이·종아리 근력을 길러 일어서기와 걷기를 돕는 것이 목표' },
+      { category: '건강', text: '다리 근력을 유지해 넘어질 위험을 줄이는 것이 목표' },
+      { category: '건강', text: '세트 사이에 쉬는 시간을 둔 구성으로 숨이 차지 않게 진행' },
       { category: '정서·인지', text: '구령에 맞춰 횟수를 세며 주의 집중과 참여 의욕 유지' },
     ],
     safetyGuide,
