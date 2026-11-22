@@ -3,7 +3,7 @@
     python build.py
 
 기호(M)는 SVG와 PNG로, 글자가 붙은 로고는 PNG로 나옵니다. PNG는 배경이 투명합니다.
-크롬이나 엣지가 필요하고, 글자(Nunito)를 받아 오려면 인터넷이 연결되어 있어야 합니다.
+크롬이나 엣지가 필요하고, 글자(Pretendard)를 받아 오려면 인터넷이 연결되어 있어야 합니다.
 """
 import os, subprocess, sys, tempfile, pathlib
 
@@ -15,7 +15,7 @@ BROWSERS = [
     r'C:\Program Files\Microsoft\Edge\Application\msedge.exe',
 ]
 RED, GOLD, BLACK, WHITE = '#9E161C', '#C39D5E', '#14171A', '#FFFFFF'
-TONES = {'컬러': ('color', RED, GOLD), '검정': ('black', BLACK, BLACK), '빨강': ('red', RED, RED), '흰색': ('white', WHITE, WHITE)}
+TONES = {'컬러': ('color', RED, GOLD), '검정': ('black', BLACK, GOLD)}
 M = 'M0,0 H30 L67.2,38.7 L104.4,0 H134.4 V100 H102.4 V48.2 L67.2,83.4 L32,48.2 V100 H0 Z'
 CHECK = 'M104.4,12.4 H122.1 V28.5 L67.2,83.4 L48.9,65.1 Z'
 

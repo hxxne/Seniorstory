@@ -27,10 +27,10 @@ export function LogoMark({ size = 28, inverse = false, className = '' }: { size?
   )
 }
 
-/** 글자 표지: 둥근 글꼴(Nunito ExtraBold). Medi는 붉은색(어두운 배경에서는 흰색), Move는 금색 */
+/** 글자 표지: 각지고 굵은 Pretendard Black. Medi는 붉은색(어두운 배경에서는 흰색), Move는 금색 */
 export function Wordmark({ inverse = false, className = '' }: { inverse?: boolean; className?: string }) {
   return (
-    <span className={`font-extrabold tracking-[-0.01em] ${className}`} style={{ fontFamily: 'Nunito, "Pretendard Variable", Pretendard, sans-serif' }}>
+    <span className={`font-dash font-black tracking-[-0.035em] ${className}`}>
       <span style={{ color: inverse ? '#FFFFFF' : RED }}>Medi</span>
       <span style={{ color: GOLD }}>Move</span>
     </span>

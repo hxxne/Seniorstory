@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8" />
 <title>MediMove logo</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@800&text=MediMove&display=block" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 <style>
-  /* ?v=color|black|red|white  &kind=mark|logo
-   * 기호는 높이 100 기준으로 그립니다. 글자는 Nunito ExtraBold(SIL Open Font License). */
+  /* ?v=color|black  &kind=mark|logo
+   * 기호는 높이 100 기준으로 그립니다. 글자는 각지고 굵은 Pretendard Black입니다(SIL Open Font License). */
   html, body { margin: 0; background: transparent; }
   body { display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh; }
-  .lock { display: flex; align-items: center; gap: 0.36em; font: 800 300px/1 Nunito, sans-serif; letter-spacing: -0.01em; }
-  .lock svg { height: 1.12em; width: auto; }
+  .lock { display: flex; align-items: center; gap: 0.4em; font: 900 292px/1 Pretendard, sans-serif; letter-spacing: -0.035em; }
+  .lock svg { height: 1.06em; width: auto; }
   .mark svg { height: 80vh; width: auto; }
 </style>
 </head>
@@ -20,7 +20,7 @@
   const v = q.get('v') || 'color'
   const kind = q.get('kind') || 'logo'
   const RED = '#9E161C', GOLD = '#C39D5E', BLACK = '#14171A', WHITE = '#FFFFFF'
-  const tone = { color: [RED, GOLD], black: [BLACK, BLACK], red: [RED, RED], white: [WHITE, WHITE] }[v]
+  const tone = { color: [RED, GOLD], black: [BLACK, GOLD] }[v]
   const M = 'M0,0 H30 L67.2,38.7 L104.4,0 H134.4 V100 H102.4 V48.2 L67.2,83.4 L32,48.2 V100 H0 Z'
   const CHECK = 'M104.4,12.4 H122.1 V28.5 L67.2,83.4 L48.9,65.1 Z'
   // 한 가지 색일 때는 체크 둘레를 가늘게 비워서 M과 구분합니다
@@ -31,7 +31,7 @@
     `<path d="${CHECK}" fill="${tone[1]}" stroke="${tone[1]}" stroke-width="2" stroke-linejoin="round"/></svg>`
   document.body.innerHTML = kind === 'mark'
     ? `<div class="mark">${mark}</div>`
-    : `<div class="lock">${mark}<span><span style="color:${tone[0]}">Medi</span><span style="color:${tone[1]}">Move</span></span></div>`
+    : `<div class="lock ${v}">${mark}<span><span style="color:${tone[0]}">Medi</span><span style="color:${tone[1]}">Move</span></span></div>`
   window.__mark = mark
 </script>
 </body>
