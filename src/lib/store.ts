@@ -206,7 +206,8 @@ export const setInstitution = (inst: Institution | null) =>
 export const registerInstitution = (inst: Institution) =>
   set((s) => ({ ...s, institution: inst, lastInstitution: inst, onboarding: freshOnboarding() }))
 
-export const logout = () => set((s) => ({ ...s, institution: null, lastInstitution: s.institution ?? s.lastInstitution }))
+/** 로그아웃하면 그 계정의 방(a-로 시작)에서도 나옵니다 */
+export const logout = () => set((s) => ({ ...s, institution: null, lastInstitution: s.institution ?? s.lastInstitution, room: s.room?.startsWith('a-') ? null : s.room }))
 
 /* ---------- 시작 체크리스트 ---------- */
 

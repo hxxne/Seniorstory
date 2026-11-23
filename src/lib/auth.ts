@@ -1,5 +1,5 @@
 import { getState, logout, registerInstitution, resetAll, setInstitution, type Institution } from './store'
-import { SYNC_URL } from './sync'
+import { ACCOUNT_ROOM, SYNC_URL } from './sync'
 
 /**
  * 기관 계정.
@@ -304,6 +304,9 @@ export async function deleteAccount(email: string, password: string): Promise<De
       if (!sameText(hash, account.hash)) return 'wrong-password'
     }
   }
+  // 이 계정의 기기들이 함께 쓰던 운동 진행 상태도 서버에서 지웁니다
+  const shared = getState().room
+  if (shared && ACCOUNT_ROOM.test(shared)) await fetch(`${SYNC_URL}/rooms/${shared}.json`, { method: 'DELETE' }).catch(() => {})
   const rest = accounts().filter((a) => a.email !== normalizeEmail(email))
   try {
     if (rest.length) save(rest)

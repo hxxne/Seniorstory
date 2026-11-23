@@ -7,7 +7,7 @@ import { phaseAt, stageDuration } from '../data/programs'
 import { nextExercise } from '../data/schedule'
 import { asset } from '../lib/asset'
 import { useStore } from '../lib/store'
-import { createRoom, useSync } from '../lib/sync'
+import { createRoom, inAccountRoom, useSync } from '../lib/sync'
 import { spaced } from '../components/TvLink'
 import { fmtClock, useStageClock } from '../lib/useStageClock'
 
@@ -159,7 +159,12 @@ export default function TV() {
               <p className="mt-[min(0.5rem,1.2vh)] text-[clamp(13px,1.3vw,17px)] text-white/55">출석 어르신 {presentCount}명 · 태블릿에서 재생을 누르면 화면이 켜집니다</p>
             </div>
             <div className="flex flex-1 items-end pt-[min(1.5rem,3vh)]">
-              {sync.room ? (
+              {inAccountRoom(sync.room) ? (
+                <div className="flex flex-wrap items-center justify-center gap-x-2 text-[clamp(13px,1.3vw,17px)] text-white/55">
+                  <span className={`h-2 w-2 rounded-full ${sync.link === 'lost' ? 'bg-d-bad' : sync.controller ? 'bg-d-ok' : 'bg-white/30'}`} />
+                  {sync.link === 'lost' ? '인터넷 연결을 확인해 주세요' : sync.controller ? '태블릿 연결됨' : '기관 계정에 연결됨 · 태블릿에서 로그인하면 바로 이어집니다'}
+                </div>
+              ) : sync.room ? (
                 <div className="flex flex-wrap items-center justify-center gap-x-[max(12px,1.6vw)] gap-y-1 text-[clamp(13px,1.3vw,17px)] text-white/55">
                   <span>태블릿 연결 코드</span>
                   <span className="tnum text-[clamp(22px,2.6vw,36px)] font-semibold leading-tight tracking-[0.06em] text-white">{spaced(sync.room)}</span>

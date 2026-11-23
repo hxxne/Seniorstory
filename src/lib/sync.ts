@@ -82,6 +82,23 @@ let bestRtt = Infinity
 let wasLost = false
 let queue: Promise<unknown> = Promise.resolve()
 
+/**
+ * 계정의 방 이름. 이메일에서 늘 같은 값이 나오므로, 같은 계정으로 로그인한 기기는 어디서나 같은 방에 모입니다.
+ * TV가 만드는 여섯 자리 코드와 겹치지 않게 a-로 시작합니다.
+ */
+export const ACCOUNT_ROOM = /^a-[0-9a-f]{24}$/
+const accountKeys = new Map<string, string | null>()
+
+async function accountRoom(email: string): Promise<string | null> {
+  try {
+    const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`medimove:room:${email.trim().toLowerCase()}`))
+    return `a-${[...new Uint8Array(bytes)].slice(0, 12).map((b) => b.toString(16).padStart(2, '0')).join('')}`
+  } catch {
+    // 보안 연결이 아닌 곳에서는 계산할 수 없습니다. 그때는 예전처럼 코드로만 묶습니다
+    return null
+  }
+}
+
 const url = (code: string, path: string) => `${SYNC_URL}/rooms/${code}${path ? `/${path}` : ''}.json`
 
 async function send(code: string, method: 'GET' | 'PUT' | 'PATCH' | 'DELETE', path: string, body?: unknown, keepalive = false): Promise<Json> {
@@ -198,6 +215,14 @@ function onEvent(type: 'put' | 'patch', raw: string) {
   }
   if (type === 'put') setPath(tree, msg.path, msg.data)
   else if (isObj(msg.data)) for (const [k, v] of Object.entries(msg.data)) setPath(tree, `${msg.path}/${k}`, v)
+
+  // 로그인한 태블릿·PC가 이 TV의 코드를 입력했습니다: 그 계정의 방으로 옮겨 갑니다
+  const to = tree.moveTo
+  if (typeof to === 'string' && ACCOUNT_ROOM.test(to) && room && !ACCOUNT_ROOM.test(room) && !getState().institution) {
+    send(room, 'DELETE', 'moveTo').catch(() => {})
+    setRoom(to)
+    return
+  }
 
   // 경로가 "/"인 put은 처음 연결됐거나 끊겼다 다시 이어졌다는 뜻입니다
   const fresh = type === 'put' && msg.path === '/'
@@ -321,6 +346,21 @@ if (syncReady && typeof window !== 'undefined') {
 
   // 연결 코드가 바뀌면(이 창에서든 같은 브라우저의 다른 창에서든) 다시 연결
   const follow = () => {
+    // 로그인한 기기는 늘 그 계정의 방에 있습니다. 같은 계정으로 들어온 기기끼리 코드 없이 이어집니다
+    const email = getState().institution?.email
+    if (email) {
+      const key = accountKeys.get(email)
+      if (key === undefined) {
+        accountKeys.set(email, null)
+        void accountRoom(email).then((k) => {
+          accountKeys.set(email, k)
+          follow()
+        })
+      } else if (key && getState().room !== key) {
+        setRoom(key)
+        return
+      }
+    }
     const want = getState().room
     if (want === room) return
     if (want) connect(want)
@@ -357,6 +397,12 @@ export async function joinRoom(input: string): Promise<JoinResult> {
     const devices = await send(code, 'GET', 'devices')
     const hasTv = isObj(devices) && Object.values(devices).some((d) => isObj(d) && d.role === 'tv')
     if (!hasTv) return 'no-tv'
+    // 로그인한 기기는 자기 방을 떠나지 않고, 그 TV를 계정의 방으로 불러옵니다
+    const mine = getState().room
+    if (getState().institution && mine && ACCOUNT_ROOM.test(mine)) {
+      await send(code, 'PUT', 'moveTo', mine)
+      return 'ok'
+    }
   } catch {
     return 'offline'
   }
@@ -365,3 +411,6 @@ export async function joinRoom(input: string): Promise<JoinResult> {
 }
 
 export const leaveRoom = () => setRoom(null)
+
+/** 지금 방이 계정의 방인지 (코드 없이 같은 계정끼리 이어진 상태) */
+export const inAccountRoom = (code: string | null) => code !== null && ACCOUNT_ROOM.test(code)

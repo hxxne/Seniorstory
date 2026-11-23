@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Link2, Unlink, X } from 'lucide-react'
 import { Btn, Dot } from './dash'
-import { joinRoom, leaveRoom, syncReady, useSync, type JoinResult } from '../lib/sync'
+import { inAccountRoom, joinRoom, leaveRoom, syncReady, useSync, type JoinResult } from '../lib/sync'
 
 const problems: Record<Exclude<JoinResult, 'ok'>, string> = {
   'bad-code': '코드는 숫자 여섯 자리입니다',
@@ -20,6 +20,7 @@ export default function TvLink() {
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState('')
+  const [sent, setSent] = useState(false)
   const input = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -31,18 +32,22 @@ export default function TvLink() {
 
   if (!syncReady) return null
 
-  const linked = sync.room !== null
+  // 로그인한 기기는 계정의 방에 늘 들어가 있습니다. 코드는 로그인하지 않은 TV를 불러올 때만 씁니다
+  const account = inAccountRoom(sync.room)
+  const linked = sync.room !== null && !account
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
     if (busy) return
     setBusy(true)
     setProblem('')
+    setSent(false)
     const result = await joinRoom(code)
     setBusy(false)
     if (result === 'ok') {
       setCode('')
-      setOpen(false)
+      if (account) setSent(true)
+      else setOpen(false)
     } else {
       setProblem(problems[result])
       input.current?.focus()
@@ -52,7 +57,7 @@ export default function TvLink() {
   return (
     <>
       <Btn size="lg" onClick={() => setOpen(true)} aria-haspopup="dialog">
-        <Link2 className="h-4 w-4 text-d-3" /> <span className="hidden sm:inline">{linked ? `코드 ${spaced(sync.room ?? '')}` : 'TV 연결'}</span>
+        <Link2 className="h-4 w-4 text-d-3" /> <span className="hidden sm:inline">{account ? (sync.tv ? 'TV 연결됨' : 'TV 연결') : linked ? `코드 ${spaced(sync.room ?? '')}` : 'TV 연결'}</span>
       </Btn>
 
       <AnimatePresence>
@@ -71,7 +76,7 @@ export default function TvLink() {
             >
               <div className="flex items-start justify-between gap-4">
                 <h2 id="tvlink-title" className="text-[19px] font-semibold tracking-[-0.02em]">
-                  {linked ? 'TV와 연결되어 있습니다' : 'TV와 연결하기'}
+                  {linked || (account && sync.tv) ? 'TV와 연결되어 있습니다' : 'TV와 연결하기'}
                 </h2>
                 <button type="button" aria-label="닫기" onClick={() => setOpen(false)} className="press -mr-2 -mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-lg text-d-3 hover:bg-d-hover hover:text-d-1">
                   <X className="h-4 w-4" />
@@ -103,14 +108,24 @@ export default function TvLink() {
                 </>
               ) : (
                 <form onSubmit={submit}>
-                  <p className="mt-2 text-[14px] leading-relaxed text-d-2">TV에서 이 사이트의 TV 화면을 열면 여섯 자리 코드가 보입니다. 그 코드를 입력해 주세요.</p>
+                  {account ? (
+                    <>
+                      <p className="mt-4 flex items-center gap-2 text-[14px] text-d-2">
+                        <Dot tone={sync.link === 'lost' ? 'bad' : sync.tv ? 'ok' : 'warn'} />
+                        {sync.link === 'lost' ? '연결이 끊겨 다시 시도하고 있습니다' : sync.tv ? 'TV 화면이 켜져 있습니다' : '켜져 있는 TV 화면이 아직 없습니다'}
+                      </p>
+                      <p className="mt-2 text-[13px] leading-relaxed text-d-3">같은 계정으로 로그인한 기기는 코드 없이 함께 움직입니다. 로그인하지 않은 TV는 TV 화면 아래에 보이는 여섯 자리 코드를 여기에 입력해 주세요.</p>
+                    </>
+                  ) : (
+                    <p className="mt-2 text-[14px] leading-relaxed text-d-2">TV에서 이 사이트의 TV 화면을 열면 여섯 자리 코드가 보입니다. 그 코드를 입력해 주세요.</p>
+                  )}
                   <label htmlFor="tvlink-code" className="mt-5 block text-[13px] font-medium text-d-2">
-                    연결 코드
+                    {account ? 'TV에 보이는 코드' : '연결 코드'}
                   </label>
                   <input
                     id="tvlink-code"
                     ref={input}
-                    autoFocus
+                    autoFocus={!account}
                     inputMode="numeric"
                     autoComplete="off"
                     maxLength={7}
@@ -129,9 +144,14 @@ export default function TvLink() {
                       {problem}
                     </p>
                   ) : null}
+                  {sent && !problem ? (
+                    <p role="status" className="mt-2 text-[13px] leading-snug text-d-ok">
+                      TV를 불러왔습니다. 잠시 뒤 위 표시가 켜짐으로 바뀝니다.
+                    </p>
+                  ) : null}
                   <div className="mt-6 flex justify-end gap-2">
                     <Btn size="lg" onClick={() => setOpen(false)}>
-                      취소
+                      {account ? '닫기' : '취소'}
                     </Btn>
                     <Btn size="lg" variant="primary" type="submit" disabled={code.length !== 6 || busy}>
                       {busy ? '연결하는 중' : '연결'}
