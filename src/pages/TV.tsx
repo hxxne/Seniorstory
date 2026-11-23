@@ -31,7 +31,7 @@ function MoveVideo({ src, poster, at, playing, muted, active }: { src: string; p
     if (!v || !active || v.readyState < 1 || v.seeking) return
     const target = Math.max(0, Math.min(at, (v.duration || at) - 0.25))
     const drift = target - v.currentTime // 양수면 영상이 뒤처진 것
-    if (Math.abs(drift) > 6 || (!playing && Math.abs(drift) > 1.5)) {
+    if (Math.abs(drift) > 3 || (!playing && Math.abs(drift) > 1.5)) {
       v.playbackRate = 1
       v.currentTime = target
     } else if (playing) {

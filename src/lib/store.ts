@@ -330,6 +330,17 @@ export function advanceStage(fromIndex: number) {
   })
 }
 
+/** 지금 단계 안에서 원하는 시각(초)으로 옮깁니다. 되돌리기와 앞으로 넘기기에 씁니다 */
+export function seekStage(sec: number) {
+  set((s) => {
+    const stage = getProgram(s.session.programId)?.stages[s.session.stageIndex]
+    if (!stage) return s
+    if (s.session.status !== 'playing' && s.session.status !== 'paused') return s
+    const at = Math.max(0, Math.min(stageDuration(stage) - 1, sec))
+    return { ...s, session: { ...s.session, elapsedBeforePause: at, stageStartedAt: s.session.status === 'playing' ? now() : null } }
+  })
+}
+
 /** 단계 내 다음 동작으로 즉시 이동 */
 export function nextMove() {
   set((s) => {

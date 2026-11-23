@@ -1,13 +1,14 @@
 import { AnimatePresence, motion } from 'motion/react'
-import { ChevronLeft, LayoutDashboard, OctagonAlert, Pause, Play, RotateCcw, SkipForward, Tv } from 'lucide-react'
+import { ChevronLeft, LayoutDashboard, OctagonAlert, Pause, Play, RotateCcw, SkipBack, SkipForward, Tv, Undo2 } from 'lucide-react'
 import Logo from '../components/Logo'
 import { Avatar, Btn, Dot, StatusIcon, cx, statusLabel, statusTone, type StatusKind } from '../components/dash'
+import SeekBar from '../components/SeekBar'
 import TvLink from '../components/TvLink'
 import { CueBar } from '../components/ui/Primitives'
 import { phaseAt, programs, stageDuration, upcomingPrograms } from '../data/programs'
 import { seniors } from '../data/seniors'
 import { openTv } from '../lib/launch'
-import { cycleSeniorStatus, emergencyStop, endSession, gotoStage, nextMove, play, startProgram, togglePlay, useStore } from '../lib/store'
+import { cycleSeniorStatus, emergencyStop, endSession, gotoStage, nextMove, play, seekStage, startProgram, togglePlay, useStore } from '../lib/store'
 import { useSync } from '../lib/sync'
 import { fmtClock, useStageClock } from '../lib/useStageClock'
 
@@ -137,8 +138,17 @@ export default function Tablet() {
                       <p className="mt-1.5 text-[12px] text-d-3">단계 남은 시간</p>
                     </div>
                   </div>
-                  <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-d-line">
-                    <div className={cx('h-full rounded-full transition-[width] duration-500 ease-linear', playing ? 'bg-d-a' : 'bg-d-warn')} style={{ width: `${progress * 100}%` }} />
+                  {/* 끌어서 되돌리거나 넘기는 막대. 동작을 놓쳤을 때 씁니다 */}
+                  <SeekBar stage={stage} elapsed={elapsed} playing={playing} disabled={emergency} onSeek={seekStage} />
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <button type="button" onClick={() => seekStage(elapsed - 10)} disabled={emergency} className="press inline-flex h-11 items-center gap-2 rounded-lg border border-d-line2 bg-white px-4 text-[14px] font-medium shadow-[0_1px_2px_rgba(16,24,40,0.04)] hover:bg-d-hover disabled:opacity-40">
+                      <Undo2 className="h-4 w-4 text-d-3" /> 10초 뒤로
+                    </button>
+                    {current ? (
+                      <button type="button" onClick={() => seekStage(current.startSec)} disabled={emergency} className="press inline-flex h-11 items-center gap-2 rounded-lg border border-d-line2 bg-white px-4 text-[14px] font-medium shadow-[0_1px_2px_rgba(16,24,40,0.04)] hover:bg-d-hover disabled:opacity-40">
+                        <SkipBack className="h-4 w-4 text-d-3" /> 이 동작 처음부터
+                      </button>
+                    ) : null}
                   </div>
 
                   {/* 현재 동작과 큐 자막: TV에 지금 나가는 문장 */}
