@@ -51,6 +51,8 @@ export interface Program {
   stages: Stage[]
   effects: { category: '건강' | '신체적' | '정서·인지'; text: string }[]
   safetyGuide: { title: string; detail: string }[]
+  /** false면 영상이 아직 없어 시작할 수 없습니다 (화면에는 준비 중으로 나옵니다) */
+  ready?: boolean
 }
 
 const m = (name: string, min: number, cue: string): Move => ({ name, durationSec: Math.round(min * 60), cue })
@@ -609,6 +611,8 @@ export const programs: Program[] = [
     id: 'p50',
     name: '통합 프로그램 50분',
     minutes: 50,
+    // 50분 영상이 아직 없습니다. 영상을 넣으면 이 줄을 지웁니다 (2026-11-23)
+    ready: false,
     tagline: '다리 운동을 더 길게, 걷는 힘까지 기르는 운동',
     description:
       '50분 프로그램은 30분 구성의 본운동에 앉아서 무릎 펴기와 의자 잡고 다리 뒤로 들기를 더해, 다리 운동을 네 동작 약 29분으로 늘렸습니다. 준비운동과 마무리운동의 흐름은 같고, 어려우신 분을 위한 쉬운 동작이 세트마다 안내됩니다.',
@@ -664,6 +668,16 @@ export const programs: Program[] = [
  * 영상이 오면 programs로 옮기고 여기서 지웁니다.
  */
 export const upcomingPrograms = [{ id: 'c30', name: '인지 향상 훈련 30분', minutes: 30, kind: '인지 향상 훈련' }] as const
+
+/** 지금 시작할 수 있는 프로그램 */
+export const readyPrograms = programs.filter((p) => p.ready !== false)
+/** 이름만 보여 주는 프로그램: 영상이 아직 없는 것과 앞으로 만들 것 */
+export const pendingPrograms: { id: string; name: string; minutes: number; kind: string }[] = [
+  ...programs.filter((p) => p.ready === false).map((p) => ({ id: p.id, name: p.name, minutes: p.minutes, kind: '통합 운동' })),
+  ...upcomingPrograms,
+]
+/** 시작할 수 있는 프로그램만 돌려줍니다 */
+export const getReadyProgram = (id: string | null | undefined) => readyPrograms.find((p) => p.id === id) ?? null
 
 export const getProgram = (id: string | null | undefined) => programs.find((p) => p.id === id) ?? null
 

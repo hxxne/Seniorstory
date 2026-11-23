@@ -5,7 +5,7 @@ import { Avatar, Btn, Dot, StatusIcon, cx, statusLabel, statusTone, type StatusK
 import SeekBar from '../components/SeekBar'
 import TvLink from '../components/TvLink'
 import { CueBar } from '../components/ui/Primitives'
-import { phaseAt, programs, stageDuration, upcomingPrograms } from '../data/programs'
+import { pendingPrograms, phaseAt, readyPrograms, stageDuration } from '../data/programs'
 import { seniors } from '../data/seniors'
 import { openTv } from '../lib/launch'
 import { cycleSeniorStatus, emergencyStop, endSession, gotoStage, nextMove, play, seekStage, startProgram, togglePlay, useStore } from '../lib/store'
@@ -68,7 +68,7 @@ export default function Tablet() {
             <p className="tnum mt-2 text-d-2">출석 어르신 {present.length}명 · 재생을 누르면 TV 화면이 바로 켜집니다</p>
 
             <div className="mt-8 grid gap-4 md:grid-cols-2">
-              {programs.map((p) => (
+              {readyPrograms.map((p) => (
                 <button key={p.id} type="button" onClick={() => startProgram(p.id, true)} className="press group rounded-2xl border border-d-line2 p-6 text-left shadow-[0_1px_2px_rgba(16,24,40,0.04)] hover:border-d-a">
                   <p className="text-[13px] font-medium text-d-a">{p.tagline}</p>
                   <h2 className="mt-1.5 text-[24px] font-semibold tracking-[-0.02em]">{p.name}</h2>
@@ -93,7 +93,7 @@ export default function Tablet() {
                   </span>
                 </button>
               ))}
-              {upcomingPrograms.map((p) => (
+              {pendingPrograms.map((p) => (
                 <div key={p.id} className="flex flex-col rounded-2xl border border-dashed border-d-line2 p-6 text-left">
                   <p className="text-[13px] font-medium text-d-2">{p.kind}</p>
                   <h2 className="mt-1.5 text-[24px] font-semibold tracking-[-0.02em] text-d-2">{p.name}</h2>

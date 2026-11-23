@@ -344,9 +344,10 @@ export default function Auth({ mode }: { mode: Mode }) {
                                         key={p.id}
                                         type="button"
                                         aria-pressed={on}
-                                        aria-label={p.name}
+                                        aria-label={p.ready === false ? `${p.name}, 준비 중` : p.name}
+                                        disabled={p.ready === false}
                                         onClick={() => patch({ program: p.id as 'p30' | 'p50' })}
-                                        className={`press rounded-xl border p-3 text-left ${on ? 'border-ink bg-ink text-white' : 'border-ink/10 bg-white hover:border-ink/25'}`}
+                                        className={`press rounded-xl border p-3 text-left disabled:cursor-not-allowed disabled:border-dashed disabled:bg-transparent disabled:opacity-60 ${on ? 'border-ink bg-ink text-white' : 'border-ink/10 bg-white hover:border-ink/25'}`}
                                       >
                                         <span className="flex items-center justify-between">
                                           <span className="tnum font-serif text-[24px] font-medium leading-none">{p.minutes}분</span>
@@ -356,7 +357,7 @@ export default function Auth({ mode }: { mode: Mode }) {
                                             </span>
                                           ) : null}
                                         </span>
-                                        <span className={`mt-2 block text-[13px] ${on ? 'text-white/70' : 'text-ink-3'}`}>{p.tagline}</span>
+                                        <span className={`mt-2 block text-[13px] ${on ? 'text-white/70' : 'text-ink-3'}`}>{p.ready === false ? '영상 준비 중' : p.tagline}</span>
                                       </button>
                                     )
                                   })}

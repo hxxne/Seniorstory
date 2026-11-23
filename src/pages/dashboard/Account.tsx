@@ -24,7 +24,7 @@ export default function Account() {
     ['이메일', institution.email],
     ['등록 어르신 수', institution.capacity ? `${institution.capacity}명` : ''],
     ['기관 연락처', institution.phone ?? ''],
-    ['기본 프로그램', institution.defaultProgram === 'p50' ? '통합 프로그램 50분' : institution.defaultProgram === 'p30' ? '통합 프로그램 30분' : ''],
+    ['기본 프로그램', institution.defaultProgram === 'p50' ? '통합 프로그램 50분 (준비 중)' : institution.defaultProgram === 'p30' ? '통합 프로그램 30분' : ''],
     ['주 운동 시간대', institution.slot ?? ''],
   ]
 

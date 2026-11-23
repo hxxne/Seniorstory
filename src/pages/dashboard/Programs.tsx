@@ -2,13 +2,13 @@ import { useState } from 'react'
 import { Clock, Layers, ListChecks, Play, TriangleAlert, Tv, UserRound } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Btn, Label, Page, PageHead, SectionHead, Seg } from '../../components/dash'
-import { programs, stageDuration, upcomingPrograms } from '../../data/programs'
+import { pendingPrograms, readyPrograms, stageDuration } from '../../data/programs'
 import { asset } from '../../lib/asset'
 import { openTablet, openTv } from '../../lib/launch'
 import { startProgram, useStore } from '../../lib/store'
 import { fmtClock } from '../../lib/useStageClock'
 
-const tabs = [...programs.map((p) => [p.id, p.name] as const), ...upcomingPrograms.map((p) => [p.id, p.name, '준비 중'] as const)]
+const tabs = [...readyPrograms.map((p) => [p.id, p.name] as const), ...pendingPrograms.map((p) => [p.id, p.name, '준비 중'] as const)]
 // 단계가 뒤로 갈수록 한 단계씩 짙어지는 파랑: 색이 아니라 순서를 보여 줍니다
 const steps = ['#C9D8FB', '#93B0F5', '#2F5FE3']
 const covers: Record<string, { src: string; pos: string }> = {
@@ -18,9 +18,9 @@ const covers: Record<string, { src: string; pos: string }> = {
 
 export default function Programs() {
   const navigate = useNavigate()
-  const [id, setId] = useState<string>(programs[0].id)
-  const upcoming = upcomingPrograms.find((p) => p.id === id)
-  const program = programs.find((p) => p.id === id) ?? programs[0]
+  const [id, setId] = useState<string>(readyPrograms[0].id)
+  const upcoming = pendingPrograms.find((p) => p.id === id)
+  const program = readyPrograms.find((p) => p.id === id) ?? readyPrograms[0]
   const session = useStore((s) => s.session)
   const live = session.status === 'playing' || session.status === 'paused' || session.status === 'emergency'
   const total = program.stages.reduce((a, s) => a + stageDuration(s), 0)

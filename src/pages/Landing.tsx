@@ -55,7 +55,7 @@ const CARDS = [
     img: IMG_B,
     pos: '38% 60%',
     size: 'auto 135%',
-    label: '[통합 프로그램 50분]',
+    label: '[통합 프로그램 50분 · 준비 중]',
     title: ['다리 운동을 더 길게,', '걷는 힘까지'],
     body: '상체 운동과 다리 운동을 더 길게 하고, 세트마다 쉬운 동작을 함께 안내합니다.',
     to: '/dashboard/programs',

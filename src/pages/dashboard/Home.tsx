@@ -6,7 +6,7 @@ import Logo from '../../components/Logo'
 import { AreaChart, Avatar, Btn, CheckBox, Dot, Label, Page, SectionHead, StatusIcon, TextLink, cx, statusLabel, statusTone, type StatusKind } from '../../components/dash'
 import { CueBar } from '../../components/ui/Primitives'
 import { kpis } from '../../data/metrics'
-import { getProgram, phaseAt, stageDuration } from '../../data/programs'
+import { getReadyProgram, phaseAt, readyPrograms, stageDuration } from '../../data/programs'
 import { nextExercise, scheduleStatus, todaySchedule } from '../../data/schedule'
 import { riskConditions, seniors } from '../../data/seniors'
 import { asset } from '../../lib/asset'
@@ -35,7 +35,7 @@ export default function Home() {
   const next = nextExercise(clock)
   // 오늘 운동이 모두 지난 뒤에는 같은 시간표의 내일 첫 세션을 보여 줍니다
   const tomorrow = !!next && scheduleStatus(next, clock) === 'done'
-  const upcoming = getProgram(next?.programId) ?? getProgram(institution?.defaultProgram) ?? null
+  const upcoming = getReadyProgram(next?.programId) ?? getReadyProgram(institution?.defaultProgram) ?? readyPrograms[0] ?? null
   const shown = program ?? upcoming
   const live = session.status === 'playing' || session.status === 'paused' || session.status === 'emergency'
   const done = session.status === 'completed'
@@ -284,7 +284,7 @@ export default function Home() {
             <ol>
               {todaySchedule.map((item) => {
                 const st = scheduleStatus(item, clock)
-                const prog = getProgram(item.programId)
+                const prog = getReadyProgram(item.programId)
                 const isLiveItem = live && prog && prog.id === program?.id
                 const kind: StatusKind = isLiveItem ? (session.status === 'playing' ? 'progress' : session.status === 'emergency' ? 'alert' : 'paused') : st === 'done' ? 'done' : 'todo'
                 return (

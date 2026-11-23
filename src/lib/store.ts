@@ -236,7 +236,7 @@ export const setAllAttendance = (present: boolean) =>
 
 export function startProgram(programId: string, autoplay = true) {
   const program = getProgram(programId)
-  if (!program) return
+  if (!program || program.ready === false) return
   const at = now()
   set((s) => ({
     ...s,
