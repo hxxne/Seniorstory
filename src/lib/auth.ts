@@ -156,7 +156,8 @@ async function identity(method: string, body: Record<string, unknown>): Promise<
   try {
     res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:${method}?key=${AUTH_KEY}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      // 비밀번호 재설정 메일과 그 메일에서 열리는 화면이 한국어로 나오게 합니다
+      headers: { 'Content-Type': 'application/json', 'X-Firebase-Locale': 'ko' },
       body: JSON.stringify(body),
     })
   } catch {
