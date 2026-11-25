@@ -1,12 +1,13 @@
 import { Activity, ArrowUpRight, ChartLine, House, LogOut, Tablet, Tv, UserRound, Users } from 'lucide-react'
 import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { AnimatePresence } from 'motion/react'
 import Logo from '../components/Logo'
 import StartGuide from '../components/StartGuide'
 import { Avatar, Dot, StatusIcon, cx } from '../components/dash'
 import { getProgram, programs } from '../data/programs'
 import { seniors } from '../data/seniors'
-import { logout, useStore } from '../lib/store'
+import { getState, logout, openSetup, useStore } from '../lib/store'
 import { openTablet, openTv } from '../lib/launch'
 
 const titles: Record<string, string> = {
@@ -17,6 +18,9 @@ const titles: Record<string, string> = {
   '/dashboard/account': '계정',
 }
 
+/** 이 창에서 시작 창을 이미 띄웠다는 표시. 창을 닫으면 사라집니다 */
+const GUIDE_SEEN = 'mm:guide-seen'
+
 /* 대시보드 셸: 옅은 회색 사이드바(244px)와 흰 본문. 32px 내비 행, 44px 머리줄 */
 export default function DashboardLayout() {
   const institution = useStore((s) => s.institution)
@@ -24,6 +28,21 @@ export default function DashboardLayout() {
   const attendance = useStore((s) => s.attendance)
   const setup = useStore((s) => s.setup)
   const { pathname } = useLocation()
+  const signedIn = institution !== null
+
+  // 사이트를 새로 열 때마다 한 번, 이미 로그인된 기기에서도 시작 창(TV 연결, 프로그램 선택)을 띄웁니다.
+  // 운동이 진행 중일 때는 가리지 않습니다. 같은 창에서 새로고침만 한 경우에는 다시 띄우지 않습니다.
+  useEffect(() => {
+    if (!signedIn) return
+    try {
+      if (sessionStorage.getItem(GUIDE_SEEN)) return
+      sessionStorage.setItem(GUIDE_SEEN, '1')
+    } catch {
+      return
+    }
+    const st = getState().session.status
+    if (st === 'idle' || st === 'completed') openSetup()
+  }, [signedIn])
 
   if (!institution) return <Navigate to="/login" replace />
 
