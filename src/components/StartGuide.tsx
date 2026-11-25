@@ -108,7 +108,7 @@ export default function StartGuide() {
             ) : (
               <>
                 <p className="mt-2 text-[14px] leading-relaxed text-d-2">
-                  TV에서 <span className="nb font-medium text-d-1">medimove.co.kr/tv</span>를 열면 화면 아래에 <span className="nb">여섯 자리 코드가</span> 보입니다. 그 코드를 입력해 주세요.
+                  TV에서 <span className="nb font-medium text-d-1">medimove.co.kr/tv</span>를 열면 화면 아래에 <span className="nb">여섯 자리 코드가</span> 보입니다. 그 코드를 입력해 주세요. TV에 <span className="nb">「기관 계정에 연결되어 있습니다」가</span> 보이면 코드 없이 이미 연결된 것입니다.
                 </p>
                 {syncReady ? (
                   <>

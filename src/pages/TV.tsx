@@ -6,7 +6,7 @@ import Figure from '../components/Figure'
 import { phaseAt, stageDuration } from '../data/programs'
 import { nextExercise } from '../data/schedule'
 import { asset } from '../lib/asset'
-import { useStore } from '../lib/store'
+import { setRoom, useStore } from '../lib/store'
 import { createRoom, inAccountRoom, useSync } from '../lib/sync'
 import { spaced } from '../components/TvLink'
 import { fmtClock, useStageClock } from '../lib/useStageClock'
@@ -68,6 +68,7 @@ function MoveVideo({ src, poster, at, playing, muted, active }: { src: string; p
 export default function TV() {
   const { session, program, stage, remaining, progress, current, elapsed } = useStageClock(true)
   const attendance = useStore((s) => s.attendance)
+  const institution = useStore((s) => s.institution)
   const presentCount = Object.values(attendance).filter(Boolean).length
   const [clock, setClock] = useState(() => new Date())
   const [cueIdx, setCueIdx] = useState(0)
@@ -127,7 +128,15 @@ export default function TV() {
     else document.documentElement.requestFullscreen?.()
   }
 
-  const idle = session.status === 'idle'
+  // 프로그램을 골라 두기만 하고 아직 한 번도 재생하지 않았으면 대기 화면을 그대로 둡니다 (연결 코드가 계속 보이게)
+  const ready = session.status === 'paused' && session.stageIndex === 0 && session.elapsedBeforePause === 0 && session.stageStartedAt === null
+  const idle = session.status === 'idle' || ready
+  // 코드로 불려 온 TV(로그인하지 않은 기기)는 연결을 풀고 새 코드를 받을 수 있습니다
+  const paired = inAccountRoom(sync.room) && !institution
+  const unpair = () => {
+    setRoom(null)
+    createRoom()
+  }
   const detail = current?.move.detail
   // 이 단계의 다음 동작, 없으면 다음 단계의 첫 동작
   const nextMove = current && stage ? (stage.moves[current.index + 1] ?? program?.stages[session.stageIndex + 1]?.moves[0]) : undefined
@@ -154,15 +163,23 @@ export default function TV() {
             <p className="tnum mt-[min(2.5rem,4vh)] text-[clamp(48px,min(12vw,22vh),160px)] font-semibold leading-none tracking-[-0.04em]">{clock.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })}</p>
             <p className="mt-[min(1rem,2vh)] text-[clamp(16px,min(2.4vw,5vh),30px)] text-white/70">{clock.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' })}</p>
             <div className="mt-[min(3rem,5vh)] w-[min(720px,80vw)] border-t border-white/15 pt-[min(2rem,3.5vh)] text-center">
-              <p className="text-[clamp(13px,1.4vw,18px)] text-white/55">다음 운동</p>
-              <p className="mt-1 text-[clamp(18px,min(2.6vw,5.6vh),34px)] font-medium">{next ? `${next.time} · ${next.title}` : '오늘 예정된 운동이 없습니다'}</p>
+              <p className="text-[clamp(13px,1.4vw,18px)] text-white/55">{ready ? '준비된 운동' : '다음 운동'}</p>
+              <p className="mt-1 text-[clamp(18px,min(2.6vw,5.6vh),34px)] font-medium">{ready && program ? program.name : next ? `${next.time} · ${next.title}` : '오늘 예정된 운동이 없습니다'}</p>
               <p className="mt-[min(0.5rem,1.2vh)] text-[clamp(13px,1.3vw,17px)] text-white/55">출석 어르신 {presentCount}명 · 태블릿에서 재생을 누르면 화면이 켜집니다</p>
             </div>
             <div className="flex flex-1 items-end pt-[min(1.5rem,3vh)]">
               {inAccountRoom(sync.room) ? (
-                <div className="flex flex-wrap items-center justify-center gap-x-2 text-[clamp(13px,1.3vw,17px)] text-white/55">
-                  <span className={`h-2 w-2 rounded-full ${sync.link === 'lost' ? 'bg-d-bad' : sync.controller ? 'bg-d-ok' : 'bg-white/30'}`} />
-                  {sync.link === 'lost' ? '인터넷 연결을 확인해 주세요' : sync.controller ? '태블릿 연결됨' : '기관 계정에 연결됨 · 태블릿에서 로그인하면 바로 이어집니다'}
+                <div className="flex flex-wrap items-center justify-center gap-x-[max(12px,1.6vw)] gap-y-1 text-[clamp(13px,1.3vw,17px)] text-white/55">
+                  <span className="inline-flex items-center gap-2 font-medium text-white">
+                    <span className={`h-2 w-2 rounded-full ${sync.link === 'lost' ? 'bg-d-bad' : 'bg-d-ok'}`} />
+                    {sync.link === 'lost' ? '인터넷 연결을 확인해 주세요' : '이 TV는 기관 계정에 연결되어 있습니다'}
+                  </span>
+                  {sync.link === 'lost' ? null : <span>{sync.controller ? '태블릿 연결됨' : '코드 없이, 태블릿에서 로그인하면 바로 이어집니다'}</span>}
+                  {paired ? (
+                    <button type="button" onClick={unpair} className="rounded-md px-2 py-1 text-white/55 underline underline-offset-4 hover:text-white focus-visible:text-white">
+                      연결 풀고 새 코드 받기
+                    </button>
+                  ) : null}
                 </div>
               ) : sync.room ? (
                 <div className="flex flex-wrap items-center justify-center gap-x-[max(12px,1.6vw)] gap-y-1 text-[clamp(13px,1.3vw,17px)] text-white/55">
