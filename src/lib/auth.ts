@@ -1,4 +1,4 @@
-import { getState, logout, registerInstitution, resetAll, setInstitution, type Institution } from './store'
+import { getState, logout, openSetup, registerInstitution, resetAll, setInstitution, type Institution } from './store'
 import { ACCOUNT_ROOM, SYNC_URL } from './sync'
 
 /**
@@ -220,6 +220,7 @@ export async function signUp(institution: Institution, password: string): Promis
       }
       remember(true)
       registerInstitution(info)
+      openSetup()
       return 'ok'
     } catch (e) {
       const code = e instanceof AuthFailure ? e.code : 'network'
@@ -237,6 +238,7 @@ export async function signUp(institution: Institution, password: string): Promis
   save([...list, { email, salt, hash, institution: info, createdAt: Date.now() }])
   remember(true)
   registerInstitution(info)
+  openSetup()
   return 'ok'
 }
 
@@ -250,6 +252,7 @@ export async function signIn(email: string, password: string, keep: boolean): Pr
       const info = (await profile('GET', s)) ?? { name: '기관', manager: mail.split('@')[0], email: mail }
       remember(keep)
       setInstitution({ ...info, email: mail })
+      openSetup()
       return 'ok'
     } catch (e) {
       const code = e instanceof AuthFailure ? e.code : 'network'
@@ -264,6 +267,7 @@ export async function signIn(email: string, password: string, keep: boolean): Pr
   if (!sameText(hash, account.hash)) return 'wrong-password'
   remember(keep)
   setInstitution(account.institution)
+  openSetup()
   return 'ok'
 }
 

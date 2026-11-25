@@ -1,6 +1,8 @@
 import { Activity, ArrowUpRight, ChartLine, House, LogOut, Tablet, Tv, UserRound, Users } from 'lucide-react'
 import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { AnimatePresence } from 'motion/react'
 import Logo from '../components/Logo'
+import StartGuide from '../components/StartGuide'
 import { Avatar, Dot, StatusIcon, cx } from '../components/dash'
 import { getProgram, programs } from '../data/programs'
 import { seniors } from '../data/seniors'
@@ -20,6 +22,7 @@ export default function DashboardLayout() {
   const institution = useStore((s) => s.institution)
   const session = useStore((s) => s.session)
   const attendance = useStore((s) => s.attendance)
+  const setup = useStore((s) => s.setup)
   const { pathname } = useLocation()
 
   if (!institution) return <Navigate to="/login" replace />
@@ -138,6 +141,7 @@ export default function DashboardLayout() {
           <Outlet />
         </main>
       </div>
+      <AnimatePresence>{setup ? <StartGuide /> : null}</AnimatePresence>
     </div>
   )
 }

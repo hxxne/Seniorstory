@@ -52,6 +52,8 @@ export interface AppState {
   lastCountedSession: number | null
   /** 다른 기기와 묶인 연결 코드. 이 기기에만 저장하고 서버로 보내지 않습니다 */
   room: string | null
+  /** 로그인 직후의 시작 창(TV 연결, 프로그램 선택)을 아직 닫지 않았는지 */
+  setup: boolean
 }
 
 /** 연결된 기기끼리 함께 쓰는 부분 */
@@ -108,6 +110,7 @@ const initial = (): AppState => ({
   completedSessionsToday: 1,
   lastCountedSession: null,
   room: null,
+  setup: false,
 })
 
 function load(): AppState {
@@ -207,7 +210,11 @@ export const registerInstitution = (inst: Institution) =>
   set((s) => ({ ...s, institution: inst, lastInstitution: inst, onboarding: freshOnboarding() }))
 
 /** 로그아웃하면 그 계정의 방(a-로 시작)에서도 나옵니다 */
-export const logout = () => set((s) => ({ ...s, institution: null, lastInstitution: s.institution ?? s.lastInstitution, room: s.room?.startsWith('a-') ? null : s.room }))
+export const logout = () => set((s) => ({ ...s, institution: null, lastInstitution: s.institution ?? s.lastInstitution, setup: false, room: s.room?.startsWith('a-') ? null : s.room }))
+
+/** 로그인 직후의 시작 창 */
+export const openSetup = () => set((s) => (s.setup ? s : { ...s, setup: true }))
+export const closeSetup = () => set((s) => (s.setup ? { ...s, setup: false } : s))
 
 /* ---------- 시작 체크리스트 ---------- */
 
